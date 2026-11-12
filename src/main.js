@@ -5,6 +5,7 @@ import { buildTimeline } from './c/timeline.js';
 import { splitTitle, measureFinal, measure } from './c/measure.js';
 import { stateAt, buildCamera } from './c/state.js';
 import { createRenderer } from './c/render.js';
+import { mountCursor, renderCursor, mountRest } from './c/kobito.js';
 
 const root = document.documentElement;
 const reduced = new URLSearchParams(location.search).get('motion') === 'reduce' ||
@@ -25,7 +26,8 @@ function startBuild() {
   document.body.dataset.mode = 'build';
 
   const timelineFor = mobile => { const T = buildTimeline(mobile ? ['a', 'b'] : ['a', 'b', 'c']); T.cam = buildCamera(T); return T; };
-  const render = createRenderer(chars);
+  const render = createRenderer(chars, { mountCursor, renderCursor });
+  mountRest($('.replay-wrap'));
 
   const sb = createProgress({
     stateAt: p => stateAt(p, ctx),
@@ -34,6 +36,14 @@ function startBuild() {
       ctx.M = measure(chars);
       if (!ctx.T || ctx.T.mobile !== ctx.M.mobile) { ctx.T = timelineFor(ctx.M.mobile); ctx.T.mobile = ctx.M.mobile; }
     },
+  });
+
+  // C-22: スクロールが 150 ミリ秒止まったら、待機の動きに切り替える
+  let idleTimer = 0;
+  sb.onProgress(() => {
+    document.body.removeAttribute('data-idle');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => document.body.setAttribute('data-idle', ''), 150);
   });
 
   $('#skip').addEventListener('click', () => sb.skip());

@@ -71,6 +71,6 @@ export function measure(chars) {
     rects, chars: chs, nchars: chs.length,
     siteW: sr.width, siteH: sr.height, vw, vh, mobile,
     ws, x0: L + (canvasW - vw * ws) / 2, topPad: bar + 44, bar,
-    pub: { x: pubR.left + pubR.width / 2, y: pubR.top + pubR.height * 0.7 },
+    pub: { x: pubR.left + pubR.width * 0.3, y: pubR.top + pubR.height * 0.7 },
   };
 }

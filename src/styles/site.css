@@ -45,6 +45,7 @@ html.boot body[data-mode="static"] { visibility: hidden; }
   width: fit-content; max-width: 100%;
 }
 .s-hero h1 em { font-family: var(--font-display-latin); font-style: italic; font-weight: 400; color: var(--accent); letter-spacing: 0; }
+.s-hero h1 .nb { white-space: nowrap; }   /* 狭い幅で「る。」だけが次の行に落ちないようにする */
 .lead { max-width: 34em; margin-top: clamp(24px, 4vh, 40px) !important; color: var(--ink-2); }
 .btns { display: flex; flex-wrap: wrap; gap: 14px; margin-top: clamp(28px, 5vh, 48px); width: fit-content; }
 

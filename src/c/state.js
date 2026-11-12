@@ -128,12 +128,20 @@ export function stateAt(p, ctx) {
   return { p, stage, local, elements, layers, selected, props, frame, cursors, comment, pressed, toolVisible: p >= 1 ? 0 : 1 - e5 };
 }
 
-/* カメラの通過点を作る。手順の中間の進行度と、その対象の中心の高さ */
+/* カメラの通過点を作る。
+ * 基本はハル(カーソル a)の作業を追う。段階 2 でハルが見出しを打ち終えたあとは、ほかのカーソルを追う。
+ * 各手順の始まり近くと終わり近くに同じ高さの通過点を置き、作業中はカメラが止まって見えるようにする。
+ */
 export function buildCamera(T) {
-  const ks = T.steps.filter(s => s.action !== 'publish').map(s => ({
-    p: (s.a + s.b) / 2,
-    y: M => M.rects[s.target].y + M.rects[s.target].h / 2,
-  }));
+  const type = T.steps.find(s => s.action === 'type');
+  const picked = T.steps.filter(s => s.action !== 'publish' &&
+    (s.cursor === 'a' || (s.stage === 2 && (s.a + s.b) / 2 > type.b)));
+  const ks = [];
+  for (const s of picked) {
+    const y = M => M.rects[s.target].y + M.rects[s.target].h / 2;
+    const d = (s.b - s.a) * 0.15;
+    ks.push({ p: s.a + d, y }, { p: s.b - d, y });
+  }
   ks.sort((a, b) => a.p - b.p);
   return ks;
 }

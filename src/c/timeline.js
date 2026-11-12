@@ -31,10 +31,10 @@ export const PRESS = 0.35;
 export const COMMENT = { stage: 4, key: 'hero-btns', from: 0.18, to: 0.62 };
 
 /* 小人が直接作業する見せ場(C-21): 段階 1・2・3・5 に 1 か所ずつ */
-const SPOTS = { '1:hero-title': 'pull', '2:hero-title': 'carry', '3:contact': 'put', '5:@publish': 'put' };
+const SPOTS = { '1:hero-title': 'pull', '2:hero-title': 'carry', '3:work-4': 'put', '5:@publish': 'put' };
 
 /* keys を段階の中に等間隔で並べる。同じカーソルの手順が重ならない長さにする */
-function spread(stage, action, keys, cursors, from = 0, to = 0.92) {
+function spread(stage, action, keys, cursors, from = 0, to = 0.88) {
   const d = (to - from) / keys.length;
   const dur = d * cursors.length * 0.86;
   return keys.map((key, i) => ({
@@ -50,7 +50,7 @@ export function buildTimeline(ids = ['a', 'b', 'c']) {
   const steps = [
     ...spread(1, 'box', ORDER, ids),
     // 段階 2: ハルが見出しを 1 文字ずつ打つ。ほかの要素は残りのカーソルが文字に置き換える
-    { stage: 2, action: 'type', target: 'hero-title', cursor: 'a', from: 0, to: 0.6 },
+    { stage: 2, action: 'type', target: 'hero-title', cursor: 'a', from: 0.06, to: 0.6 },
     ...spread(2, 'text', rest, others, 0.04, 0.96),
     ...spread(3, 'fill', ORDER, ids),
     ...spread(4, 'polish', ORDER, ids),

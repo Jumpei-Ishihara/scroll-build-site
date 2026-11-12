@@ -21,6 +21,8 @@ export function createProgress(opts) {
     for (const fn of listeners) fn(p, state);
   }
 
+  // 途中のスクロール位置で読み込まれると、作成の直後に onUpdate が呼ばれる。先に測っておく(COM-06)
+  opts.remeasure();
   const trigger = ScrollTrigger.create({
     trigger: '#pin',
     start: 'top top',

@@ -105,3 +105,49 @@ body[data-mode="build"] #controls { display: flex; }
   #controls { bottom: 12px; gap: 10px; padding-left: 14px; }
   #controls li { width: 14px; }
 }
+
+/* 小人(SPEC-20 4.1)。線画。ヘルメットだけ担当カーソルの色 */
+.kobito {
+  position: absolute; left: var(--kx, 16px); top: var(--ky, 32px); width: 36.5px; height: 42px; color: #16150F; overflow: visible;
+  /* 暗い面の上でも線が見えるよう、紙色の縁取りを付ける */
+  filter: drop-shadow(0 0 1px #F6F3EC) drop-shadow(0 0 1px #F6F3EC) drop-shadow(0 0 0.5px #F6F3EC);
+}
+.kobito g[data-pose] { display: none; }
+.kobito g[data-pose].on { display: inline; }
+.kobito .st, .kobito .drop { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.kobito .helmet { fill: var(--c, var(--cursor-a)); stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.kobito .face { fill: #F6F3EC; stroke: currentColor; stroke-width: 1.8; }
+.kobito .eye { fill: currentColor; }
+.kobito .prop { fill: #FFFFFF; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.kobito .prop.fill { fill: var(--accent); }
+.kobito .drop { stroke: var(--accent); }
+.kobito[data-noprop] .prop, .kobito[data-noprop] .drop { display: none; }
+
+/* 動作ごとの立ち位置(カーソルの先端が原点) */
+.kobito[data-pose="pull"]  { --kx: -34px; --ky: -14px; scale: -1 1; }   /* 箱の内側から角を押し広げる */
+.kobito[data-pose="carry"] { --kx: 6px;   --ky: -43px; }                /* 文字の列の右端に立つ */
+.kobito[data-pose="put"]   { --kx: -42px; --ky: -30px; }
+.kobito[data-pose="put"][data-noprop] { --kx: -36px; --ky: -4px; }      /* 公開ボタンを押す */
+
+/* 待機の動き(C-22): スクロールが止まっている間だけ */
+@keyframes k-sway { 0%, 100% { rotate: -5deg; } 50% { rotate: 5deg; } }
+@keyframes k-bob  { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
+body[data-idle] .cur .kobito { animation: k-bob 1.2s ease-in-out infinite; }
+body[data-idle] .cur .kobito[data-pose="hang"] { animation: k-sway 2.4s ease-in-out infinite; transform-origin: 50% 0; }
+body[data-idle] .cur[data-cur="b"] .kobito { animation-delay: -0.8s; }
+body[data-idle] .cur[data-cur="c"] .kobito { animation-delay: -1.5s; }
+
+/* 公開後にフッターで休憩している 1 人(C-24) */
+.replay-wrap { position: relative; display: inline-block; }
+.kobito.rest { display: none; --c: var(--cursor-a); left: -46px; top: auto; bottom: -9px; animation: k-bob 3s ease-in-out infinite; }
+body[data-mode="done"] .kobito.rest { display: block; }
+
+@media (max-width: 767px) {
+  .kobito { width: 26px; height: 30px; }
+  .kobito[data-pose="hang"], .kobito[data-pose="wave"] { --kx: 14px; --ky: 30px; }
+  .kobito[data-pose="pull"]  { --kx: -25px; --ky: -10px; }
+  .kobito[data-pose="carry"] { --kx: 4px;   --ky: -31px; }
+  .kobito[data-pose="put"]   { --kx: -30px; --ky: -22px; }
+  .kobito[data-pose="put"][data-noprop] { --kx: -26px; --ky: -3px; }
+  .kobito.rest { left: -34px; bottom: -6px; }
+}

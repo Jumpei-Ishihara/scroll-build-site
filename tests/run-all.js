@@ -3,7 +3,7 @@
  * フェーズを追加したら suites に番号を足す(tests/phase<番号>.js、結果は window.__P<番号>RESULTS)
  */
 (async () => {
-  const suites = ['1', '2'];
+  const suites = ['1', '2', '3', '4'];
   const out = {};
   for (const n of suites) {
     const src = await fetch(`tests/phase${n}.js?all=${Date.now()}`).then(r => r.text());
