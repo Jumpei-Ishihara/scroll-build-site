@@ -1,0 +1,102 @@
+/* デザイントークン(SPEC-20)
+ * 共通の値は :root、案ごとの値は [data-theme] に置く。
+ * コントラスト比は SPEC-20 の表を参照。値を変えたら表も計算し直すこと。
+ */
+:root {
+  /* 余白: 4px 刻み */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px; --sp-24: 96px;
+
+  /* 文字の大きさ: 画面幅 375px〜1440px の間で連続的に変わる */
+  --fs-display: clamp(2.75rem, 1.4rem + 5.8vw, 6.5rem);
+  --fs-h2:      clamp(1.75rem, 1.3rem + 1.9vw, 3rem);
+  --fs-h3:      clamp(1.125rem, 1.05rem + 0.35vw, 1.375rem);
+  --fs-body:    clamp(0.9375rem, 0.9rem + 0.16vw, 1.0625rem);
+  --fs-small:   0.8125rem;
+  --fs-tool:    0.75rem;      /* ツール UI は固定 12px */
+
+  --lh-display: 1.08;
+  --lh-heading: 1.3;
+  --lh-body:    1.85;         /* 日本語の本文向けに広め */
+
+  /* 動き */
+  --dur-snap:    0.18s;       /* 選択枠、行の追加など、ツールの反応 */
+  --dur-apply:   0.32s;       /* 色や配置が反映されるとき */
+  --dur-publish: 0.9s;        /* 公開の切り替え(時間で動かす場合の目安) */
+  --ease-snap:    cubic-bezier(0.2, 0.9, 0.3, 1);
+  --ease-apply:   cubic-bezier(0.3, 0.7, 0.2, 1);
+  --ease-publish: cubic-bezier(0.7, 0, 0.2, 1);
+
+  /* カーソルの色(案 C のカーソル 3 人。白文字のラベルで 4.5:1 以上) */
+  --cursor-a: #D63A18;
+  --cursor-b: #2747F5;
+  --cursor-c: #0B7F58;
+
+  --font-tool: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+
+/* 案 C: 架空のデザインスタジオ。温かい紙の白 + 墨 + 朱 */
+[data-theme="c"] {
+  --paper:        #F6F3EC;
+  --paper-2:      #ECE8DD;    /* カードなど一段沈めた面 */
+  --ink:          #16150F;
+  --ink-2:        #5C594F;    /* 補足の文字 */
+  --line:         #DCD7CA;
+  --accent:       #E8421F;    /* 図形と特大の文字専用(紙の上で 3.6:1) */
+  --accent-text:  #C2330F;    /* 通常サイズの文字とボタンの地(5.0:1) */
+  --on-accent:    #FFFFFF;
+
+  --radius-s: 6px; --radius-m: 14px; --radius-l: 28px;
+  --shadow-card: 0 1px 0 rgba(22, 21, 15, 0.06), 0 12px 32px -12px rgba(22, 21, 15, 0.18);
+
+  --font-display-latin: "Instrument Serif", "Shippori Mincho", serif;
+  --font-display: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+
+  /* ツール UI(デザインツール風): 明るい中立色。完成サイトの紙色より冷たくして区別する */
+  --tool-canvas:  #E7E6E2;
+  --tool-dot:     #CFCDC6;
+  --tool-panel:   #FFFFFF;
+  --tool-line:    #E4E2DC;
+  --tool-text:    #2B2A26;
+  --tool-text-2:  #6B685F;
+  --tool-select:  #2747F5;    /* 選択枠 */
+}
+
+/* 案 D+E: 架空の開発会社。冷たい白 + 墨 + コバルト。エディタは暗色 */
+[data-theme="de"] {
+  --paper:        #F4F6F8;
+  --paper-2:      #E8ECF0;
+  --ink:          #0E1116;
+  --ink-2:        #535B66;
+  --line:         #D5DAE0;
+  --accent:       #2747F5;    /* 紙の上で 5.9:1。文字にも使える */
+  --accent-text:  #2747F5;
+  --on-accent:    #FFFFFF;
+  --signal:       #C6F432;    /* 暗い面の上の強調専用 */
+
+  --radius-s: 4px; --radius-m: 10px; --radius-l: 20px;
+  --shadow-card: 0 0 0 1px rgba(14, 17, 22, 0.06), 0 16px 40px -16px rgba(14, 17, 22, 0.22);
+
+  --font-display-latin: "IBM Plex Sans JP", "Hiragino Sans", sans-serif;
+  --font-display: "IBM Plex Sans JP", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ツール UI(チャットとエディタ): 暗色 */
+  --tool-canvas:  #0A0C10;
+  --tool-panel:   #161A21;    /* チャット */
+  --tool-editor:  #0F1217;    /* エディタ */
+  --tool-line:    #252B35;
+  --tool-text:    #D7DCE3;
+  --tool-text-2:  #8792A0;
+  --tool-lineno:  #5B6470;    /* 行番号(装飾扱い) */
+
+  /* コードの色分け(エディタの地の上ですべて 4.5:1 以上) */
+  --syn-selector: #E7C9FF;
+  --syn-property: #8FB8FF;
+  --syn-value:    #C6F432;
+  --syn-tag:      #FF8A70;
+  --syn-punct:    #9AA4B1;
+  --syn-comment:  #8792A0;
+}

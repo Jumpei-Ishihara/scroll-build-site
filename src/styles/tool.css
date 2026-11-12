@@ -1,0 +1,107 @@
+/* ツール UI(デザインツール風)と、進行の表示。SPEC-20 4.1 */
+#tool, #tool-bg { display: none; }
+body[data-mode="build"] #tool, body[data-mode="build"] #tool-bg { display: block; }
+
+#tool-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background-color: var(--tool-canvas);
+  background-image: radial-gradient(var(--tool-dot) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+#tool {
+  --tl: 200px; --tr: 220px; --tb: 44px;
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  font-family: var(--font-tool); font-size: var(--fs-tool); line-height: 1.5; color: var(--tool-text);
+}
+#t-bar {
+  position: absolute; left: 0; right: 0; top: 0; height: var(--tb);
+  background: var(--tool-panel); border-bottom: 1px solid var(--tool-line);
+  display: flex; align-items: center; gap: 14px; padding: 0 12px; will-change: transform;
+}
+#t-bar .ico { width: 16px; height: 16px; stroke: var(--tool-text-2); fill: none; stroke-width: 1.5; flex: none; }
+#t-bar .ico.on { stroke: var(--tool-select); }
+#t-bar .file { margin: 0 auto; color: var(--tool-text-2); white-space: nowrap; }
+#t-bar .file b { color: var(--tool-text); font-weight: 600; }
+#t-publish {
+  background: var(--tool-select); color: #fff; border-radius: 6px; padding: 5px 14px; font-weight: 600; white-space: nowrap;
+  transition: transform var(--dur-snap) var(--ease-snap), background-color var(--dur-snap);
+}
+#t-publish.pressed { transform: scale(0.92); background: #1B34C4; }
+
+#t-layers, #t-props {
+  position: absolute; top: var(--tb); bottom: 0; background: var(--tool-panel); padding: 14px 12px; will-change: transform;
+}
+#t-layers { left: 0; width: var(--tl); border-right: 1px solid var(--tool-line); }
+#t-props { right: 0; width: var(--tr); border-left: 1px solid var(--tool-line); }
+.ptitle { color: var(--tool-text-2); font-size: 11px; margin: 0 0 8px; }
+#t-name { color: var(--tool-text); font-weight: 600; font-size: 12px; }
+.layer { padding: 5px 8px; border-radius: 4px; display: flex; gap: 7px; align-items: center; white-space: nowrap; }
+.layer[hidden] { display: none; }
+.layer::before { content: ""; width: 9px; height: 9px; border: 1.5px solid currentColor; border-radius: 2px; opacity: 0.55; flex: none; }
+.layer.in { padding-left: 24px; }
+.layer.sel { background: color-mix(in srgb, var(--tool-select) 12%, transparent); color: var(--tool-select); font-weight: 600; }
+.prop { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--tool-line); font-variant-numeric: tabular-nums; }
+.prop > span:first-child { color: var(--tool-text-2); }
+.chip { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 6px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12); }
+
+#t-overlay { position: absolute; inset: 0; overflow: hidden; }
+#t-fname { position: absolute; left: 0; top: 0; color: var(--tool-text-2); font-size: 11px; white-space: nowrap; will-change: transform; }
+#t-sel { position: absolute; left: 0; top: 0; border: 1.5px solid var(--tool-select); visibility: hidden; will-change: transform, width, height; }
+#t-sel .h { position: absolute; width: 7px; height: 7px; background: #fff; border: 1.5px solid var(--tool-select); }
+#t-sel .h:nth-child(1) { left: -4.5px; top: -4.5px; }   #t-sel .h:nth-child(2) { right: -4.5px; top: -4.5px; }
+#t-sel .h:nth-child(3) { left: -4.5px; bottom: -4.5px; } #t-sel .h:nth-child(4) { right: -4.5px; bottom: -4.5px; }
+#t-dim {
+  position: absolute; left: 50%; top: calc(100% + 7px); transform: translateX(-50%);
+  background: var(--tool-select); color: #fff; font-weight: 600; font-size: 10px; padding: 2px 6px; border-radius: 3px; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* コメントピン(段階 4) */
+#t-pin {
+  position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50% 50% 50% 4px;
+  background: #F2B705; box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.4);
+  opacity: 0; transition: opacity var(--dur-snap), background-color var(--dur-apply);
+}
+#t-pin span {
+  position: absolute; left: 32px; top: -2px; background: #fff; color: var(--tool-text); padding: 6px 10px; border-radius: 8px;
+  white-space: nowrap; box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.35); transition: opacity var(--dur-snap);
+}
+#t-pin.on { opacity: 1; }
+#t-pin.resolved { background: var(--cursor-c); }
+#t-pin.resolved span { opacity: 0; }
+
+/* カーソル */
+.cur { position: absolute; left: 0; top: 0; color: var(--c); will-change: transform; visibility: hidden; }
+.cur .arrow { width: 18px; height: 18px; fill: var(--c); stroke: #fff; stroke-width: 1.2; display: block; }
+.cur .name {
+  position: absolute; left: 14px; top: 14px; background: var(--c); color: #fff; font-weight: 600; font-size: 11px;
+  padding: 3px 8px; border-radius: 3px 10px 10px 10px; white-space: nowrap;
+}
+
+/* 進行の表示とスキップ */
+#controls {
+  position: fixed; left: 50%; bottom: 18px; z-index: 3; transform: translateX(-50%);
+  display: none; align-items: center; gap: 14px;
+  background: rgba(22, 21, 15, 0.92); color: #F6F3EC; border-radius: 999px; padding: 8px 8px 8px 18px;
+  font-family: var(--font-tool); font-size: 12px; line-height: 1.4; white-space: nowrap;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+body[data-mode="build"] #controls { display: flex; }
+#controls .ind { display: flex; align-items: center; gap: 12px; }
+#controls ol { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+#controls li { width: 22px; height: 4px; border-radius: 2px; background: rgba(246, 243, 236, 0.25); overflow: hidden; position: relative; }
+#controls li::after { content: ""; position: absolute; inset: 0; background: #F6F3EC; transform-origin: 0 50%; transform: scaleX(var(--f, 0)); }
+#stage-name { min-width: 5.5em; }
+#skip {
+  font: inherit; font-weight: 700; color: #16150F; background: #F6F3EC; border: 0; border-radius: 999px; padding: 8px 16px; cursor: pointer;
+}
+#skip:hover { background: #fff; }
+
+@media (max-width: 1023px) { #tool { --tl: 164px; --tr: 184px; } }
+@media (max-width: 767px) {
+  #tool { --tl: 0px; --tr: 0px; }
+  #t-layers, #t-props { display: none; }
+  #t-bar .ico:not(.on) { display: none; }
+  #controls { bottom: 12px; gap: 10px; padding-left: 14px; }
+  #controls li { width: 14px; }
+}

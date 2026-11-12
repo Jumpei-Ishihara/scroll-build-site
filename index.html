@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>こびとの手 デザイン室</title>
+<meta name="description" content="ブランドとWebサイトをつくる小さなデザインスタジオ(架空のデモサイト)。">
+<script>
+  /* 演出を行う環境では、起動までの一瞬に完成形が見えないよう隠す。3 秒で起動しなければ完成形を出す(COM-23) */
+  (function () {
+    var q = new URLSearchParams(location.search);
+    if (q.get('motion') === 'reduce' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var d = document.documentElement;
+    d.classList.add('boot');
+    setTimeout(function () { d.classList.remove('boot'); }, 3000);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="src/styles/tokens.css">
+<link rel="stylesheet" href="src/styles/site.css">
+<link rel="stylesheet" href="src/styles/tool.css">
+<link rel="stylesheet" href="src/styles/build.css">
+</head>
+<body data-mode="static" data-theme="c">
+
+<!-- ツール UI の背景(キャンバス)。完成サイトより奥 -->
+<div id="tool-bg" aria-hidden="true"></div>
+
+<!-- 完成サイト。演出中はこの実物を縮小して見せる -->
+<div id="pin">
+  <div id="frame">
+    <div id="site">
+      <header>
+        <div class="wrap s-header" data-key="header">
+          <a class="logo" href="#top">こびとの手<span>デザイン室</span></a>
+          <nav aria-label="メイン">
+            <a href="#features">できること</a>
+            <a href="#works">実績</a>
+            <a class="btn small" href="#contact">相談する</a>
+          </nav>
+        </div>
+      </header>
+
+      <main id="top">
+        <section class="wrap s-hero">
+          <h1 data-key="hero-title">手で考え、<br><em>pixel</em> で仕上げる。</h1>
+          <p class="lead" data-key="hero-lead">私たちは、ブランドとWebサイトをつくる小さなデザインスタジオです。最初のスケッチから公開の日まで、同じ顔ぶれが担当します。</p>
+          <div class="btns" data-key="hero-btns">
+            <a class="btn primary" href="#contact">相談してみる</a>
+            <a class="btn" href="#works">実績を見る</a>
+          </div>
+        </section>
+
+        <section class="wrap s-features" id="features" aria-label="できること">
+          <article class="card lift" data-key="card-1">
+            <span class="num">01</span>
+            <div><h2>ブランド設計</h2><p>名前、ロゴ、色、言葉づかい。事業の芯を、見える形にします。</p></div>
+          </article>
+          <article class="card" data-key="card-2">
+            <span class="num">02</span>
+            <div><h2>Webサイト制作</h2><p>設計から実装まで、一貫して担当します。</p></div>
+          </article>
+          <article class="card inv" data-key="card-3">
+            <span class="num">03</span>
+            <div><h2>運用の伴走</h2><p>公開後の改善を、月単位で続けます。</p></div>
+          </article>
+        </section>
+
+        <section class="wrap s-works" id="works">
+          <h2 class="sec-title" data-key="works-title">これまでの仕事</h2>
+          <div class="works">
+            <article class="work" data-key="work-1">
+              <div class="thumb t1" role="img" aria-label="朱色の円と墨色の四角による図形"></div>
+              <h3>喫茶 ひだまり</h3><p>ブランド設計 / Webサイト</p>
+            </article>
+            <article class="work" data-key="work-2">
+              <div class="thumb t2" role="img" aria-label="墨色の地に並んだ紙色の縦線"></div>
+              <h3>つきよ文具店</h3><p>オンラインストア</p>
+            </article>
+            <article class="work" data-key="work-3">
+              <div class="thumb t3" role="img" aria-label="紙色の地に重なる二つの半円"></div>
+              <h3>森のこども園</h3><p>Webサイト / 入園案内</p>
+            </article>
+            <article class="work" data-key="work-4">
+              <div class="thumb t4" role="img" aria-label="朱色の地に斜めに置かれた白い帯"></div>
+              <h3>港町ベーカリー</h3><p>ロゴ / パッケージ</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="wrap s-contact" id="contact">
+          <div class="contact" data-key="contact">
+            <h2>まずは、話を聞かせてください。</h2>
+            <p>決まっていないことが多くても大丈夫です。30分のオンライン相談を無料で受け付けています。</p>
+            <a class="btn primary" href="mailto:hello@example.com">相談を申し込む</a>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <div class="wrap s-footer" data-key="footer">
+          <span>こびとの手 デザイン室(架空のデモサイト)</span>
+          <button type="button" id="replay">もう一度組み立てる</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>
+
+<!-- ツール UI。演出中だけ表示。操作と読み上げの対象から外す(COM-31) -->
+<div id="tool" aria-hidden="true" inert>
+  <div id="t-bar">
+    <svg class="ico on" viewBox="0 0 16 16"><path d="M3 2l4 11 1.6-4.4L13 7z"/></svg>
+    <svg class="ico" viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="1"/></svg>
+    <svg class="ico" viewBox="0 0 16 16"><path d="M3 4h10M8 4v9"/></svg>
+    <svg class="ico" viewBox="0 0 16 16"><path d="M3 12c3-8 7-8 10 0"/></svg>
+    <span class="file">下書き / <b>トップページ</b></span>
+    <span id="t-publish">公開</span>
+  </div>
+  <div id="t-layers"><p class="ptitle">レイヤー</p><div id="t-layer-list"></div></div>
+  <div id="t-props">
+    <p class="ptitle" id="t-name">—</p>
+    <div class="prop"><span>幅</span><span id="t-w">—</span></div>
+    <div class="prop"><span>高さ</span><span id="t-h">—</span></div>
+    <div class="prop"><span>X</span><span id="t-x">—</span></div>
+    <div class="prop"><span>Y</span><span id="t-y">—</span></div>
+    <div class="prop"><span>塗り</span><span><i class="chip" id="t-chip"></i><span id="t-fill">—</span></span></div>
+    <div class="prop"><span>角丸</span><span id="t-radius">—</span></div>
+  </div>
+  <div id="t-overlay">
+    <span id="t-fname">トップページ</span>
+    <div id="t-sel"><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><b id="t-dim"></b></div>
+    <div id="t-pin"><span>ボタンをもう少し大きく</span></div>
+  </div>
+</div>
+
+<!-- 進行の表示とスキップ。ここだけは演出中も操作できる -->
+<div id="controls">
+  <div class="ind" aria-hidden="true">
+    <ol><li data-seg></li><li data-seg></li><li data-seg></li><li data-seg></li><li data-seg></li><li data-seg></li></ol>
+    <span id="stage-name"></span>
+  </div>
+  <button type="button" id="skip">完成形を見る</button>
+</div>
+
+<script src="libs/gsap.min.js"></script>
+<script src="libs/ScrollTrigger.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

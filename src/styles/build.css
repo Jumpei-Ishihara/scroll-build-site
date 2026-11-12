@@ -1,0 +1,55 @@
+/* 演出中(body[data-mode="build"])だけ有効な指定。
+ * 完成サイトの各要素は data-b で「どこまで組み上がったか」を持つ(SPEC-11 5 章)。
+ *   hidden → box(灰色の箱) → text(文字) → color(色と画像) → final(角丸と影)
+ * ここの色と角丸の値は src/c/state.js の定数(WF, WF2, INK, 角丸 3px)と一致させること(C-03)。
+ */
+body[data-mode="build"] { background: var(--tool-canvas); }
+body[data-mode="build"] #pin { position: relative; z-index: 1; }
+body[data-mode="build"] #frame {
+  transform-origin: 0 0; will-change: transform;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.07), 0 30px 80px -30px rgba(0, 0, 0, 0.35);
+}
+body[data-mode="build"] #site { pointer-events: none; }   /* 公開まではリンクを押せない */
+
+body[data-mode="build"] #site [data-key],
+body[data-mode="build"] #site [data-key] * {
+  transition: background-color var(--dur-apply) var(--ease-apply), color var(--dur-apply) var(--ease-apply),
+    border-color var(--dur-apply) var(--ease-apply), border-radius var(--dur-apply) var(--ease-apply),
+    box-shadow var(--dur-apply) var(--ease-apply), opacity var(--dur-snap) linear;
+}
+
+/* hidden: まだ置かれていない */
+body[data-mode="build"] #site [data-b="hidden"] { visibility: hidden; }
+
+/* box: 灰色の箱。--b で左上から右下へ広がる */
+body[data-mode="build"] #site [data-b="box"] {
+  background: #DAD7CF !important; color: transparent !important; border-color: transparent !important;
+  border-radius: 3px !important; box-shadow: none !important;
+  clip-path: inset(0 calc((1 - var(--b, 1)) * 100%) calc((1 - var(--b, 1)) * 100%) 0);
+}
+body[data-mode="build"] #site [data-b="box"] * { visibility: hidden !important; }
+
+/* text: 文字が入る。色と角丸はまだ */
+body[data-mode="build"] #site [data-b="text"] {
+  color: #16150F !important; border-radius: 3px !important; box-shadow: none !important;
+}
+body[data-mode="build"] #site [data-b="text"]:not([data-surface]) { background: transparent !important; }
+body[data-mode="build"] #site [data-b="text"][data-surface] { background: #E6E3DB !important; }
+body[data-mode="build"] #site [data-b="text"] *:not(.ch) { color: inherit !important; opacity: 1 !important; }
+body[data-mode="build"] #site [data-b="text"] .ch { color: inherit !important; }
+body[data-mode="build"] #site [data-b="text"] .btn { background: #DAD7CF !important; border-color: transparent !important; border-radius: 3px !important; }
+body[data-mode="build"] #site [data-b="text"] .thumb {
+  border-radius: 3px !important;
+  background: linear-gradient(to top right, transparent calc(50% - 1px), #C4C0B5 50%, transparent calc(50% + 1px)), #E6E3DB !important;
+}
+body[data-mode="build"] #site [data-b="text"] .thumb::before,
+body[data-mode="build"] #site [data-b="text"] .thumb::after { opacity: 0; }
+
+/* color: 色と画像が入る。角丸と影はまだ */
+body[data-mode="build"] #site [data-b="color"],
+body[data-mode="build"] #site [data-b="color"] .btn,
+body[data-mode="build"] #site [data-b="color"] .thumb { border-radius: 3px !important; box-shadow: none !important; }
+
+/* 見出しの 1 文字ずつの表示(C-11) */
+body[data-mode="build"] #site .ch.off { opacity: 0; }
+body[data-mode="build"] #site .ch { transition: none; }

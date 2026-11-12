@@ -1,0 +1,106 @@
+/* 完成サイトの見た目(SPEC-20 4.1、6 章)。演出のための指定はここに書かない → build.css */
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: clip; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); }
+html.boot body[data-mode="static"] { visibility: hidden; }
+
+#site {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-feature-settings: "palt";
+  overflow: hidden;
+}
+#site h1, #site h2, #site h3, #site p { margin: 0; }
+#site a { color: inherit; text-decoration: none; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-inline: clamp(20px, 5vw, 72px); }
+
+/* ヘッダー */
+.s-header { display: flex; justify-content: space-between; align-items: center; height: 72px; }
+.logo { font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; letter-spacing: 0.02em; }
+.logo span { font-family: var(--font-body); font-weight: 500; font-size: 0.75rem; margin-left: 0.6em; color: var(--ink-2); }
+.s-header nav { display: flex; align-items: center; gap: clamp(16px, 2.4vw, 36px); font-size: 0.875rem; font-weight: 500; }
+
+/* ボタン */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-body); font-weight: 700; font-size: var(--fs-body); line-height: 1.2;
+  padding: 16px 30px; border-radius: 999px; border: 1.5px solid var(--ink);
+  background: transparent; color: var(--ink);
+  transition: transform var(--dur-snap) var(--ease-snap), background-color var(--dur-snap), color var(--dur-snap);
+}
+.btn:hover { transform: translateY(-2px); background: var(--ink); color: var(--paper); }
+#site .btn.primary { background: var(--accent-text); border-color: var(--accent-text); color: var(--on-accent); }
+#site .btn.primary:hover { background: var(--ink); border-color: var(--ink); }
+.btn.small { padding: 10px 20px; font-size: 0.875rem; }
+#site a:focus-visible, #site button:focus-visible, #controls button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* ヒーロー */
+.s-hero { padding-top: clamp(56px, 11vh, 128px); padding-bottom: clamp(72px, 14vh, 160px); }
+.s-hero h1 {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: var(--fs-display); line-height: var(--lh-display); letter-spacing: -0.01em;
+  width: fit-content; max-width: 100%;
+}
+.s-hero h1 em { font-family: var(--font-display-latin); font-style: italic; font-weight: 400; color: var(--accent); letter-spacing: 0; }
+.lead { max-width: 34em; margin-top: clamp(24px, 4vh, 40px) !important; color: var(--ink-2); }
+.btns { display: flex; flex-wrap: wrap; gap: 14px; margin-top: clamp(28px, 5vh, 48px); width: fit-content; }
+
+/* 特徴カード: 幅をそろえない箱詰め */
+.s-features { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: clamp(12px, 1.6vw, 24px); }
+.card {
+  background: var(--paper-2); border-radius: var(--radius-l);
+  padding: clamp(22px, 2.4vw, 36px); min-height: clamp(220px, 26vw, 340px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
+}
+.card.lift { background: #FFFFFF; box-shadow: var(--shadow-card); }
+.card.inv { background: var(--ink); color: var(--paper); }
+.card h2 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3); line-height: var(--lh-heading); margin-bottom: 8px !important; }
+.card p { font-size: var(--fs-small); line-height: 1.75; opacity: 0.78; }
+.num { font-family: var(--font-display-latin); font-size: clamp(2.5rem, 4vw, 4rem); line-height: 1; color: var(--accent); }
+
+/* 実績 */
+.s-works { padding-top: clamp(88px, 14vh, 168px); }
+.sec-title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h2); line-height: var(--lh-heading); width: fit-content; }
+.works { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 4vw, 56px) clamp(16px, 2.4vw, 32px); margin-top: clamp(28px, 5vh, 56px); }
+.work h3 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3); line-height: var(--lh-heading); margin-top: 16px !important; }
+.work p { font-size: var(--fs-small); color: var(--ink-2); line-height: 1.7; }
+.thumb { aspect-ratio: 16 / 10; border-radius: var(--radius-m); position: relative; overflow: hidden; background: var(--paper-2); }
+.thumb::before, .thumb::after { content: ""; position: absolute; }
+.t1::before { width: 34%; aspect-ratio: 1; border-radius: 50%; background: var(--accent); left: 22%; top: 20%; }
+.t1::after { width: 30%; height: 46%; background: var(--ink); right: 18%; bottom: 14%; }
+.t2 { background: var(--ink); }
+.t2::before { inset: 22% 16%; background: repeating-linear-gradient(90deg, var(--paper) 0 6%, transparent 6% 14%); }
+.t3::before { width: 44%; aspect-ratio: 2 / 1; border-radius: 999px 999px 0 0; background: var(--ink); left: 14%; top: 26%; }
+.t3::after { width: 44%; aspect-ratio: 2 / 1; border-radius: 0 0 999px 999px; background: var(--accent); right: 14%; bottom: 22%; }
+.t4 { background: var(--accent); }
+.t4::before { width: 130%; height: 22%; background: #FFFFFF; left: -15%; top: 39%; transform: rotate(-14deg); }
+
+/* 問い合わせ */
+.s-contact { padding-top: clamp(88px, 14vh, 168px); padding-bottom: clamp(48px, 8vh, 96px); }
+.contact {
+  background: var(--ink); color: var(--paper); border-radius: var(--radius-l);
+  padding: clamp(40px, 7vw, 104px) clamp(24px, 5vw, 80px);
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px;
+}
+.contact h2 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h2); line-height: var(--lh-heading); }
+.contact p { max-width: 30em; opacity: 0.78; }
+#site .contact .btn.primary { margin-top: 12px; background: var(--accent); border-color: var(--accent); color: var(--ink); }
+#site .contact .btn.primary:hover { background: var(--paper); border-color: var(--paper); }
+
+/* フッター */
+.s-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 28px 40px; font-size: var(--fs-small); color: var(--ink-2); }
+#replay { font: inherit; font-weight: 700; color: var(--ink); background: none; border: 0; border-bottom: 1.5px solid var(--ink); padding: 2px 0; cursor: pointer; }
+body[data-mode="static"] #replay { display: none; }
+
+@media (max-width: 767px) {
+  .s-header nav a:not(.btn) { display: none; }
+  .logo span { display: none; }
+  .s-features { grid-template-columns: 1fr; }
+  .card { min-height: 180px; }
+  .works { grid-template-columns: 1fr; }
+  .btn { padding: 14px 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
