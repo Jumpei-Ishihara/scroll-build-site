@@ -21,15 +21,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="src/styles/tokens.css">
 <link rel="stylesheet" href="src/styles/site.css">
-<link rel="stylesheet" href="src/styles/tool.css">
+<link rel="stylesheet" href="src/styles/ui.css">
 <link rel="stylesheet" href="src/styles/build.css">
 </head>
 <body data-mode="static" data-theme="c">
 
-<!-- ツール UI の背景(キャンバス)。完成サイトより奥 -->
-<div id="tool-bg" aria-hidden="true"></div>
-
-<!-- 完成サイト。演出中はこの実物を縮小して見せる -->
+<!-- 完成サイト。演出中は、場面ごとにページの動きを止めて、その場で組み立てる -->
 <div id="pin">
   <div id="frame">
     <div id="site">
@@ -110,44 +107,21 @@
   </div>
 </div>
 
-<!-- ツール UI。演出中だけ表示。操作と読み上げの対象から外す(COM-31) -->
-<div id="tool" aria-hidden="true" inert>
-  <div id="t-bar">
-    <svg class="ico on" viewBox="0 0 16 16"><path d="M3 2l4 11 1.6-4.4L13 7z"/></svg>
-    <svg class="ico" viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="1"/></svg>
-    <svg class="ico" viewBox="0 0 16 16"><path d="M3 4h10M8 4v9"/></svg>
-    <svg class="ico" viewBox="0 0 16 16"><path d="M3 12c3-8 7-8 10 0"/></svg>
-    <span class="file">下書き / <b>トップページ</b></span>
-    <span id="t-publish">公開</span>
-  </div>
-  <div id="t-layers"><p class="ptitle">レイヤー</p><div id="t-layer-list"></div></div>
-  <div id="t-props">
-    <p class="ptitle" id="t-name">—</p>
-    <div class="prop"><span>幅</span><span id="t-w">—</span></div>
-    <div class="prop"><span>高さ</span><span id="t-h">—</span></div>
-    <div class="prop"><span>X</span><span id="t-x">—</span></div>
-    <div class="prop"><span>Y</span><span id="t-y">—</span></div>
-    <div class="prop"><span>塗り</span><span><i class="chip" id="t-chip"></i><span id="t-fill">—</span></span></div>
-    <div class="prop"><span>角丸</span><span id="t-radius">—</span></div>
-  </div>
-  <div id="t-overlay">
-    <span id="t-fname">トップページ</span>
-    <div id="t-sel"><i class="h"></i><i class="h"></i><i class="h"></i><i class="h"></i><b id="t-dim"></b></div>
-    <div id="t-pin"><span>ボタンをもう少し大きく</span></div>
-  </div>
-</div>
+<!-- 小人。固定中だけ画面に入ってくる。操作と読み上げの対象から外す(COM-31) -->
+<div id="crew" aria-hidden="true"></div>
 
-<!-- 進行の表示とスキップ。ここだけは演出中も操作できる -->
+<!-- 先頭でだけ出す案内 -->
+<p id="hint"><span>下にスクロールすると、小人たちがサイトを組み立てます</span><i aria-hidden="true">↓</i></p>
+
+<!-- 進行の表示とスキップ -->
 <div id="controls">
   <div class="ind" aria-hidden="true">
-    <ol><li data-seg></li><li data-seg></li><li data-seg></li><li data-seg></li><li data-seg></li><li data-seg></li></ol>
+    <ol><li data-seg></li><li data-seg></li><li data-seg></li><li data-seg></li><li data-seg></li></ol>
     <span id="stage-name"></span>
   </div>
   <button type="button" id="skip">完成形を見る</button>
 </div>
 
-<script src="libs/gsap.min.js"></script>
-<script src="libs/ScrollTrigger.min.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>
 </html>

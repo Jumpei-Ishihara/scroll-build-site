@@ -1,21 +1,15 @@
 /* 演出中(body[data-mode="build"])だけ有効な指定。
  * 完成サイトの各要素は data-b で「どこまで組み上がったか」を持つ(SPEC-11 5 章)。
  *   hidden → box(灰色の箱) → text(文字) → color(色と画像) → final(角丸と影)
- * ここの色と角丸の値は src/c/state.js の定数(WF, WF2, INK, 角丸 3px)と一致させること(C-03)。
  */
-body[data-mode="build"] { background: var(--tool-canvas); }
-body[data-mode="build"] #pin { position: relative; z-index: 1; }
-body[data-mode="build"] #frame {
-  transform-origin: 0 0; will-change: transform;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.07), 0 30px 80px -30px rgba(0, 0, 0, 0.35);
-}
-body[data-mode="build"] #site { pointer-events: none; }   /* 公開まではリンクを押せない */
+/* 完成した要素だけ操作できる(S-15) */
+body[data-mode="build"] #site [data-key]:not([data-b="final"]) { pointer-events: none; }
 
 body[data-mode="build"] #site [data-key],
 body[data-mode="build"] #site [data-key] * {
   transition: background-color var(--dur-apply) var(--ease-apply), color var(--dur-apply) var(--ease-apply),
     border-color var(--dur-apply) var(--ease-apply), border-radius var(--dur-apply) var(--ease-apply),
-    box-shadow var(--dur-apply) var(--ease-apply), opacity var(--dur-snap) linear;
+    box-shadow var(--dur-apply) var(--ease-apply), opacity var(--dur-snap) linear, clip-path 0.14s linear;
 }
 
 /* hidden: まだ置かれていない */

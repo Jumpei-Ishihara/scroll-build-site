@@ -1,5 +1,5 @@
 import { $, $$ } from '../core/util.js';
-import { ORDER } from './timeline.js';
+import { ORDER, SCENES, HOLD } from './timeline.js';
 
 const hex = rgb => {
   const m = rgb.match(/[\d.]+/g).map(Number);
@@ -45,11 +45,9 @@ export function measureFinal() {
   return final;
 }
 
-/* 位置と大きさを測る。起動時と画面幅の変更時だけ呼ぶ。スクロール中は呼ばない(SPEC-11 8 章) */
+/* 位置と大きさを測り、場面ごとの固定位置を決める。起動時と画面の大きさの変更時だけ呼ぶ */
 export function measure(chars) {
-  const frame = $('#frame'), site = $('#site');
-  const prev = frame.style.transform;
-  frame.style.transform = 'none';
+  const site = $('#site');
   const sr = site.getBoundingClientRect();
   const rects = {};
   for (const key of ORDER) {
@@ -57,20 +55,26 @@ export function measure(chars) {
     rects[key] = { x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height };
   }
   const chs = chars.map(c => { const r = c.getBoundingClientRect(); return { l: r.left - sr.left, r: r.right - sr.left, b: r.bottom - sr.top }; });
-  frame.style.transform = prev;
 
   const vw = document.documentElement.clientWidth, vh = window.innerHeight;
-  const w = el => (el && getComputedStyle(el).display !== 'none' ? el.getBoundingClientRect().width : 0);
-  const L = w($('#t-layers')), Rw = w($('#t-props'));
-  const bar = $('#t-bar').getBoundingClientRect().height || 44;
-  const pubR = $('#t-publish').getBoundingClientRect();
-  const mobile = vw < 768;
-  const canvasW = vw - L - Rw;
-  const ws = mobile ? 0.74 : (canvasW * 0.84) / vw;        // 作業中の縮小率
+  const siteH = sr.height;
+  const maxCam = Math.max(0, siteH - vh);
+  const hold = vh * HOLD;
+  let passed = 0, prevCam = 0;
+  const scenes = SCENES.map(sc => {
+    const top = Math.min(...sc.keys.map(k => rects[k].y));
+    const bottom = Math.max(...sc.keys.map(k => rects[k].y + rects[k].h));
+    const h = bottom - top;
+    // S-02: 画面の中央に固定する。S-07: 画面より高い場合は上端を合わせる
+    let cam = h <= vh - 40 ? top + h / 2 - vh / 2 : top - 20;
+    cam = Math.max(prevCam, Math.min(maxCam, Math.max(0, cam)));   // S-06: 上に戻らない
+    const s0 = cam + passed;
+    passed += hold; prevCam = cam;
+    return { id: sc.id, name: sc.name, keys: sc.keys, top, h, cam, hold, s0, s1: s0 + hold };
+  });
   return {
-    rects, chars: chs, nchars: chs.length,
-    siteW: sr.width, siteH: sr.height, vw, vh, mobile,
-    ws, x0: L + (canvasW - vw * ws) / 2, topPad: bar + 44, bar,
-    pub: { x: pubR.left + pubR.width * 0.3, y: pubR.top + pubR.height * 0.7 },
+    rects, chars: chs, nchars: chs.length, scenes,
+    siteW: sr.width, siteH, vw, vh, mobile: vw < 768,
+    maxCam, holds: passed, maxScroll: maxCam + passed,
   };
 }
