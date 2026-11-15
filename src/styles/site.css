@@ -12,6 +12,7 @@ html.boot body[data-mode="static"] { visibility: hidden; }
   line-height: var(--lh-body);
   font-feature-settings: "palt";
   overflow: hidden;
+  position: relative;
 }
 #site h1, #site h2, #site h3, #site p { margin: 0; }
 #site a { color: inherit; text-decoration: none; }
@@ -45,6 +46,9 @@ html.boot body[data-mode="static"] { visibility: hidden; }
   width: fit-content; max-width: 100%;
 }
 .s-hero h1 em { font-family: var(--font-display-latin); font-style: italic; font-weight: 400; color: var(--accent); letter-spacing: 0; }
+/* 見出しのかたまり、説明文、節の見出し。演出ではこの単位で運ぶので、transform が効く箱にしておく */
+.s-hero h1 [data-part] { display: inline-block; }
+.lead > [data-part], .sec-title > [data-part] { display: block; }
 .s-hero h1 .nb { white-space: nowrap; }   /* 狭い幅で「る。」だけが次の行に落ちないようにする */
 .lead { max-width: 34em; margin-top: clamp(24px, 4vh, 40px) !important; color: var(--ink-2); }
 .btns { display: flex; flex-wrap: wrap; gap: 14px; margin-top: clamp(28px, 5vh, 48px); width: fit-content; }
@@ -68,6 +72,7 @@ html.boot body[data-mode="static"] { visibility: hidden; }
 .works { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 4vw, 56px) clamp(16px, 2.4vw, 32px); margin-top: clamp(28px, 5vh, 56px); }
 .work h3 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-h3); line-height: var(--lh-heading); margin-top: 16px !important; }
 .work p { font-size: var(--fs-small); color: var(--ink-2); line-height: 1.7; }
+.work h3, .work p { width: fit-content; }   /* 演出で小人が文字の真下に入れるよう、箱を文字の幅にする */
 .thumb { aspect-ratio: 16 / 10; border-radius: var(--radius-m); position: relative; overflow: hidden; background: var(--paper-2); }
 .thumb::before, .thumb::after { content: ""; position: absolute; }
 .t1::before { width: 34%; aspect-ratio: 1; border-radius: 50%; background: var(--accent); left: 22%; top: 20%; }

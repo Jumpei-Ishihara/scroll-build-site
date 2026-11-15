@@ -6,31 +6,6 @@ const hex = rgb => {
   return { hex: '#' + m.slice(0, 3).map(v => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase(), alpha: m.length > 3 ? m[3] : 1 };
 };
 
-/* 見出しを 1 文字ずつ <span class="ch"> に分ける。元の文章は aria-label に残す(COM-20) */
-export function splitTitle(el) {
-  el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim());
-  const wrap = document.createElement('span');
-  wrap.setAttribute('aria-hidden', 'true');
-  while (el.firstChild) wrap.appendChild(el.firstChild);
-  el.appendChild(wrap);
-  const walk = node => {
-    for (const n of [...node.childNodes]) {
-      if (n.nodeType === 3) {
-        const frag = document.createDocumentFragment();
-        for (const c of n.textContent) {
-          if (/\s/.test(c)) { frag.appendChild(document.createTextNode(c)); continue; }
-          const s = document.createElement('span');
-          s.className = 'ch'; s.textContent = c;
-          frag.appendChild(s);
-        }
-        n.replaceWith(frag);
-      } else if (n.nodeType === 1) walk(n);
-    }
-  };
-  walk(wrap);
-  return $$('.ch', el);
-}
-
 /* 完成形の色と角丸を読む。data-mode="static" の間に 1 回だけ呼ぶ(C-03 の元データ) */
 export function measureFinal() {
   const final = {};
@@ -46,7 +21,7 @@ export function measureFinal() {
 }
 
 /* 位置と大きさを測り、場面ごとの固定位置を決める。起動時と画面の大きさの変更時だけ呼ぶ */
-export function measure(chars) {
+export function measure() {
   const site = $('#site');
   const sr = site.getBoundingClientRect();
   const rects = {};
@@ -54,9 +29,22 @@ export function measure(chars) {
     const r = $(`#site [data-key="${key}"]`).getBoundingClientRect();
     rects[key] = { x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height };
   }
-  const chs = chars.map(c => { const r = c.getBoundingClientRect(); return { l: r.left - sr.left, r: r.right - sr.left, b: r.bottom - sr.top }; });
-
   const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+
+  // パーツ(小人が運ぶ単位)。運んでいる途中は transform でずれているので、transform の影響を受けない offset で測る
+  const parts = {}, partsOf = {};
+  for (const key of ORDER) {
+    partsOf[key] = $$('[data-part]', $(`#site [data-key="${key}"]`)).map((el, i) => {
+      let x = 0, y = 0;
+      for (let n = el; n && n !== site; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; }
+      const w = el.offsetWidth, h = el.offsetHeight;
+      // P-02: 置き場所が左寄りなら左の外から、それ以外は右の外から入る。dx0 は運び始めのずれ
+      const dx0 = x + w / 2 < sr.width / 2 - 1 ? -(x + w + 70) : vw - x + 70;
+      const id = `${key}:${i}`;
+      parts[id] = { key, x, y, w, h, dx0 };
+      return id;
+    });
+  }
   const siteH = sr.height;
   const maxCam = Math.max(0, siteH - vh);
   const hold = vh * HOLD;
@@ -73,7 +61,7 @@ export function measure(chars) {
     return { id: sc.id, name: sc.name, keys: sc.keys, top, h, cam, hold, s0, s1: s0 + hold };
   });
   return {
-    rects, chars: chs, nchars: chs.length, scenes,
+    rects, parts, partsOf, scenes,
     siteW: sr.width, siteH, vw, vh, mobile: vw < 768,
     maxCam, holds: passed, maxScroll: maxCam + passed,
   };

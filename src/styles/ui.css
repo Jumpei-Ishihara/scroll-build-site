@@ -30,7 +30,7 @@ body[data-mode="build"] #crew { display: block; position: fixed; inset: 0; z-ind
 
 /* 動作ごとの立ち位置。原点は作業している点。歩く・手を振るは足元が原点 */
 .kobito[data-pose="pull"]  { --kx: -34px; --ky: -14px; scale: -1 1; }   /* 箱の内側から角を押し広げる */
-.kobito[data-pose="carry"] { --kx: 4px;   --ky: -43px; }                /* 文字の列の右端に立つ */
+/* carry は足元が原点。両手を上げた先(小人の上端)が、運んでいるパーツの下の辺に届く */
 .kobito[data-pose="put"]   { --kx: -42px; --ky: -30px; }
 
 /* 待機の動き(K-08): スクロールが止まっている間だけ */
@@ -73,7 +73,6 @@ body[data-mode="build"] #controls {
 @media (max-width: 767px) {
   .kobito { width: 26px; height: 30px; --kx: -13px; --ky: -30px; }
   .kobito[data-pose="pull"]  { --kx: -25px; --ky: -10px; }
-  .kobito[data-pose="carry"] { --kx: 3px;   --ky: -31px; }
   .kobito[data-pose="put"]   { --kx: -30px; --ky: -22px; }
   .kobito.rest { left: -34px; bottom: -6px; }
   body[data-mode="build"] #controls { bottom: 12px; gap: 8px; padding-left: 14px; }

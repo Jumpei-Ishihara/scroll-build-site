@@ -1,11 +1,15 @@
-/* 状態 → 画面(SPEC-03)。DOM は読まず、書き込みだけ行う */
+/* 状態 → 画面(SPEC-03、SPEC-04)。書き込みだけ行う */
 import { $, $$ } from '../core/util.js';
 import { ORDER, WORKERS } from './timeline.js';
 
-export function createRenderer(chars, hooks = {}) {
+export function createRenderer(hooks = {}) {
   const frame = $('#frame'), pin = $('#pin'), crew = $('#crew'), hint = $('#hint');
   const els = Object.fromEntries(ORDER.map(k => [k, $(`#site [data-key="${k}"]`)]));
   const stageName = $('#stage-name'), segs = $$('#controls [data-seg]');
+  // パーツ。ID は measure.js と同じ「要素:番号」
+  const partEls = {};
+  for (const k of ORDER) $$('[data-part]', els[k]).forEach((el, i) => { partEls[`${k}:${i}`] = el; });
+  const lastX = {};
 
   const workerEls = {};
   for (const [id, color] of Object.entries(WORKERS)) {
@@ -15,7 +19,6 @@ export function createRenderer(chars, hooks = {}) {
     if (hooks.mountWorker) hooks.mountWorker(d, id);
   }
 
-  let shownChars = -1;
   const set = (el, prop, v) => { if (el.style[prop] !== v) el.style[prop] = v; };
   const text = (el, v) => { if (el.textContent !== v) el.textContent = v; };
 
@@ -24,6 +27,7 @@ export function createRenderer(chars, hooks = {}) {
       frame.classList.remove('pinned');
       set(frame, 'transform', ''); set(pin, 'height', '');
       document.body.toggleAttribute('data-complete', mode === 'done');
+      for (const el of Object.values(partEls)) { set(el, 'visibility', ''); set(el, 'transform', ''); }
       return;
     }
     // 固定中はページを画面に貼り付ける。移動中は通常の流れに戻し、終えた固定の分だけ下にずらす(S-02、S-04、S-05)
@@ -36,14 +40,25 @@ export function createRenderer(chars, hooks = {}) {
       if (el.dataset.b !== e.b) el.dataset.b = e.b;
       if (e.b === 'box') el.style.setProperty('--b', e.t.toFixed(3));
     }
-    const n = st.elements['hero-title'].chars;
-    if (n !== shownChars) { chars.forEach((c, i) => c.classList.toggle('off', i >= n)); shownChars = n; }
+    // パーツ: 待機中は外で隠しておき、運んでいる間は小人と一緒に動かす(P-03〜P-05)
+    for (const [id, el] of Object.entries(partEls)) {
+      const p = st.parts[id];
+      set(el, 'visibility', p.s === 'wait' ? 'hidden' : '');
+      set(el, 'transform', p.s === 'placed' ? '' : `translate3d(${p.dx}px, ${p.dy}px, 0)`);
+    }
 
     for (const [id, el] of Object.entries(workerEls)) {
       const w = st.workers[id];
-      if (!w || !w.visible) { set(el, 'visibility', 'hidden'); continue; }
+      if (!w || !w.visible) { set(el, 'visibility', 'hidden'); lastX[id] = null; continue; }
+      const tf = `translate(${w.x}px, ${w.y}px)`;
+      // 外で次のパーツを取って反対側から入るときなど、離れた場所へ移るときは補間しない
+      if (lastX[id] == null || Math.abs(w.x - lastX[id]) > M.vw * 0.5) {
+        el.style.transition = 'none'; set(el, 'transform', tf);
+        void el.offsetWidth;
+        el.style.transition = '';
+      } else set(el, 'transform', tf);
+      lastX[id] = w.x;
       set(el, 'visibility', 'visible');
-      set(el, 'transform', `translate(${w.x}px, ${w.y}px)`);
       if (hooks.renderWorker) hooks.renderWorker(el, id, w);
     }
 

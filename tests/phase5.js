@@ -51,7 +51,7 @@
   t('S-02 / S-05 固定中は動かず、境界で飛ばない', pinOk, pinD.join(' '));
 
   // ---- S-03 固定の長さ ----
-  t('S-03 固定の長さは画面の 1.4 倍', M.scenes.every(sc => Math.abs(sc.hold - M.vh * 1.4) < 1), M.scenes.map(s => Math.round(s.hold)).join(','));
+  t('S-03 固定の長さは画面の 1.8 倍', M.scenes.every(sc => Math.abs(sc.hold - M.vh * 1.8) < 1), M.scenes.map(s => Math.round(s.hold)).join(','));
 
   // ---- S-04 移動中は 1:1 ----
   const sc1 = M.scenes[1], sc2 = M.scenes[2];
@@ -102,13 +102,7 @@
   const hiddenOk = keysOf(4).every(el => getComputedStyle(el).visibility === 'hidden') && keysOf(0).every(el => getComputedStyle(el).visibility === 'visible');
   t('S-12 DOM が状態と一致', domOk && hiddenOk);
 
-  // ---- S-13 / S-14 見出し ----
-  let inc = true, lastC = -1; const seenC = new Set();
-  for (let q = 0; q <= 1.0001; q += 0.01) { const c = S.stateAt(S.pOf(0, Math.min(1, q))).elements['hero-title'].chars || 0; if (c < lastC) inc = false; lastC = c; seenC.add(c); }
-  t('S-13 見出しが 1 文字ずつ増える', inc && seenC.size >= 6 && lastC === M.nchars, `${lastC}/${M.nchars} 種類=${seenC.size}`);
-  await S.setScene(0, 0.4);
-  const shown = $$('#site [data-key="hero-title"] .ch').filter(el => !el.classList.contains('off')).length;
-  t('S-13b 表示文字数が状態と一致', shown === S.state.elements['hero-title'].chars && shown > 0 && shown < M.nchars, `${shown}/${M.nchars}`);
+  // ---- S-14 巻き戻し(見出しの運び方は phase7 の P-09) ----
   await S.setScene(3, 1); await S.setScene(1, 0.3);
   t('S-14 巻き戻し', S.state.pinned && JSON.stringify(S.state.elements) === JSON.stringify(S.stateAt(S.progress).elements) && S.state.elements['work-1'].b === 'hidden');
 
@@ -122,7 +116,7 @@
   const hintOn = getComputedStyle($('#hint')).opacity !== '0' && $('#hint').textContent.includes('スクロール');
   await S.setScene(0, 0.3);
   t('S-20 先頭だけ案内を出す', hintOn && getComputedStyle($('#hint')).opacity === '0');
-  t('S-21 進行表示に場面と工程', /ヒーロー/.test($('#stage-name').textContent) && /骨組み|文字|色|仕上げ/.test($('#stage-name').textContent), $('#stage-name').textContent);
+  t('S-21 進行表示に場面と工程', /ヒーロー/.test($('#stage-name').textContent) && /骨組み|文字とパーツ|色|仕上げ/.test($('#stage-name').textContent), $('#stage-name').textContent);
 
   // ---- S-24 ページ内リンク ----
   await S.setScene(0, 1);

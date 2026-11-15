@@ -60,8 +60,9 @@
     t('K-03c 表示するコマは 1 つだけ', vis.length >= 1 && on.length === 1, on.map(g => g.dataset.pose).join(','));
     const h = k ? k.getBoundingClientRect().height : 0;
     t('K-05 小人の大きさ', S.m.mobile ? (h >= 24 && h <= 32) : (h >= 32 && h <= 48), h.toFixed(1));
-    const inView = vis.every(w => { const r = w.querySelector('.kobito').getBoundingClientRect(); return r.right > 0 && r.left < innerWidth && r.bottom > 0 && r.top < innerHeight; });
-    t('K-02c 作業中の小人は画面内', inView);
+    // パーツを取りに外へ出ている小人もいるので、全員ではなく 1 人以上が画面内にいることを確認する
+    const inView = vis.some(w => { const r = w.querySelector('.kobito').getBoundingClientRect(); return r.right > 0 && r.left < innerWidth && r.bottom > 0 && r.top < innerHeight; });
+    t('K-02c 作業中の小人が画面内にいる', inView);
     window.scrollTo(0, S.m.scenes[1].s1 + 30); await S.settle();
     t('K-02d 移動中は小人を出さない', ws.filter(seen).length === 0 && !S.state.pinned);
 
