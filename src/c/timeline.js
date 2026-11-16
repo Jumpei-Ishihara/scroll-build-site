@@ -12,13 +12,17 @@ export const ORDER = SCENES.flatMap(s => s.keys);
 
 /* 工程: 場面の中の 4 つの作業。from / to は場面内の進み具合(0〜1) */
 export const SUBS = [
-  { id: 'box',    name: '骨組み',       action: 'box',    from: 0.04, to: 0.20 },
-  { id: 'carry',  name: '文字とパーツ', action: 'carry',  from: 0.22, to: 0.66 },
-  { id: 'fill',   name: '色',           action: 'fill',   from: 0.68, to: 0.82 },
-  { id: 'polish', name: '仕上げ',       action: 'polish', from: 0.84, to: 0.94 },
+  { id: 'box',    name: '骨組み',       action: 'box',    from: 0.08, to: 0.22 },
+  { id: 'carry',  name: '文字とパーツ', action: 'carry',  from: 0.24, to: 0.76 },
+  { id: 'fill',   name: '色',           action: 'fill',   from: 0.78, to: 0.89 },
+  { id: 'polish', name: '仕上げ',       action: 'polish', from: 0.90, to: 0.96 },
 ];
-/* 固定の長さ(画面の高さの何倍か)。SPEC-04 3 章 */
-export const HOLD = 2.8;
+/* 1 場面の組み立てにかける時間と、場面の間の移動にかける時間(ミリ秒)。SPEC-05 A-02 */
+export const BUILD_MS = 3200;
+export const MOVE_MS = 700;
+/* 進み具合を 1 本の数直線(0〜1)で表すときの、場面 1 つ分の長さ(画面の高さの何倍か)。
+ * 実際のスクロール量ではなく、状態の計算とテストで使う目盛り */
+export const HOLD = 1;
 /* 運ぶ手順のうち、パーツを運んでいる割合。残りは手ぶらで外へ戻る(P-06) */
 export const CARRY = 0.78;
 

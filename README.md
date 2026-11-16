@@ -1,8 +1,8 @@
 # scroll-build-site
 
-スクロールに合わせて Web サイトが組み上がっていく演出のデモ。
-セクションが画面に来るとページの動きが止まり、スクロールに合わせて小人たちがそのセクションを組み立てる。組み上がると次のセクションへ進む(SPEC-03)。
-小人はまず枠を用意し、文字やパーツを画面の外から運んできて枠の中に置く(SPEC-04)。
+Web サイトが目の前で組み上がっていく演出のデモ。
+ページを開くと、小人たちが最初のセクションを約 3 秒で組み立てる。1 回スクロールすると次のセクションへ移動し、また組み立てが始まる。組み立てが終わるまでページは固定される(SPEC-05)。
+小人はまず枠を用意し、文字やパーツを画面の外から運んできて枠の中に置く(SPEC-04)。全部組み上がると、通常のページになる。
 
 ## 見かた
 
@@ -10,7 +10,7 @@
 python3 -m http.server 8742
 ```
 
-`http://localhost:8742/` を開いてスクロールする。Claude Code からは `.claude/launch.json` の `scroll-build-site` で起動できる。
+`http://localhost:8742/` を開く。Claude Code からは `.claude/launch.json` の `scroll-build-site` で起動できる。
 
 | URL | 内容 |
 |---|---|
@@ -22,15 +22,15 @@ python3 -m http.server 8742
 
 | パス | 内容 |
 |---|---|
-| `index.html` | 完成サイトの HTML と、小人・案内・進行表示の置き場 |
+| `index.html` | 完成サイトの HTML と、小人・進行表示の置き場 |
 | `src/main.js` | 起動 |
-| `src/core/scroll.js` | スクロール位置から状態を求めて描画する。固定と移動の切り替え、スキップ、やり直し |
+| `src/core/scroll.js` | 進行の管理。時間で組み立てを進め、スクロールやキーの入力で次の場面へ移動する。スキップ、やり直し |
 | `src/c/timeline.js` | 場面(固定の単位)、工程、手順のデータ |
-| `src/c/state.js` | スクロール位置から状態を計算する `stateAt`。副作用なし |
+| `src/c/state.js` | 場面ごとの進み具合から状態を計算する `compose`。副作用なし |
 | `src/c/render.js` | 状態を画面に反映する |
 | `src/c/measure.js` | 要素とパーツ(`data-part`)の位置と大きさの計測、場面ごとの固定位置の計算 |
 | `src/c/kobito.js` | 小人の絵と、コマの切り替え |
-| `src/styles/` | `tokens.css`(色や文字の値)、`site.css`(完成サイト)、`ui.css`(固定、小人、案内、進行表示)、`build.css`(組み立て途中の見た目) |
+| `src/styles/` | `tokens.css`(色や文字の値)、`site.css`(完成サイト)、`ui.css`(固定、小人、進行表示)、`build.css`(組み立て途中の見た目) |
 | `tests/` | ブラウザ上で実行するテスト |
 | `specs/` | 要件、技術選定、詳細設計、デザイン設計 |
 | `企画書.md` | 調査結果と企画候補 |
@@ -45,20 +45,22 @@ python3 -m http.server 8742
 fetch('tests/run-all.js').then(r => r.text()).then(eval)
 ```
 
-結果は `window.__ALLRESULTS`。フェーズごとの結果は `window.__P<番号>RESULTS`。
+実際の時間で動かすテストがあるので、終わるまで 1 分ほどかかる。結果は `window.__ALLRESULTS`。フェーズごとの結果は `window.__P<番号>RESULTS`。
 
 | ファイル | 対象 | 件数 |
 |---|---|---|
-| `phase5.js` | 固定と移動、組み立ての順序、スキップ、やり直し、ページ内リンク | 25 |
-| `phase6.js` | 小人、スマホ幅、動きを減らす設定、幅の変更、再読み込み、性能の目安 | 28 |
+| `phase5.js` | 場面の表示位置、組み立ての順序、操作できる範囲 | 16 |
+| `phase6.js` | 小人、スマホ幅、動きを減らす設定、幅の変更、再読み込み、性能の目安 | 27 |
 | `phase7.js` | 小人がパーツを運ぶ演出 | 22 |
+| `phase8.js` | 時間で進む組み立て、スクロール・キー・スワイプでの移動、スキップ、やり直し、ページ内リンク | 28 |
 
 ## 調整する場所
 
 | 変えたいこと | 場所 |
 |---|---|
 | 場面の区切り、場面に含める要素 | `src/c/timeline.js` の `SCENES` |
-| 1 場面あたりの固定の長さ | `src/c/timeline.js` の `HOLD`(画面の高さの 2.8 倍) |
+| 1 場面の組み立てにかける時間 | `src/c/timeline.js` の `BUILD_MS`(3200 ミリ秒) |
+| 場面の間の移動にかける時間 | `src/c/timeline.js` の `MOVE_MS`(700 ミリ秒) |
 | 工程の配分(骨組み、文字とパーツ、色、仕上げ) | `src/c/timeline.js` の `SUBS` |
 | 小人が 1 回で運ぶ単位 | `index.html` の `data-part` |
 | 色、書体、動きの速さ | `src/styles/tokens.css` |
@@ -69,7 +71,9 @@ fetch('tests/run-all.js').then(r => r.text()).then(eval)
 | API | 内容 |
 |---|---|
 | `SB.progress` / `SB.state` / `SB.mode` | 現在の進行度、状態、モード(`static` / `build` / `done`) |
-| `SB.stateAt(p)` | スクロールせずに、進行度 `p` の状態を計算する |
-| `SB.setScene(k, q)` | テスト用。場面 `k` の進み具合 `q` の位置へ移動し、補間を終わらせてから返す |
-| `SB.setProgress(p)` | テスト用。進行度 `p` の位置へ移動する |
+| `SB.stateAt(p)` | 進行度 `p` の状態を計算する |
+| `SB.phase` / `SB.scene` / `SB.built` | 段階(`idle` / `move` / `build`)、今いる場面、組み上がった場面の数 |
+| `SB.next()` / `SB.prev()` / `SB.go(k)` | 次、前、場面 `k` へ移動する |
+| `SB.setScene(k, q)` | テスト用。アニメーションを止め、場面 `k` の進み具合 `q` の状態にする |
+| `SB.setProgress(p)` | テスト用。アニメーションを止め、進行度 `p` の状態にする |
 | `SB.m` | 計測値。`SB.m.scenes` に場面ごとの固定位置が入る |

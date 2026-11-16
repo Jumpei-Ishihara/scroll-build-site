@@ -26,7 +26,7 @@
 </head>
 <body data-mode="static" data-theme="c">
 
-<!-- 完成サイト。演出中は、場面ごとにページの動きを止めて、その場で組み立てる -->
+<!-- 完成サイト。演出中は、場面ごとに約 3 秒のアニメーションで組み立てる -->
 <div id="pin">
   <div id="frame">
     <div id="site">
@@ -109,9 +109,6 @@
 
 <!-- 小人。固定中だけ画面に入ってくる。操作と読み上げの対象から外す(COM-31) -->
 <div id="crew" aria-hidden="true"></div>
-
-<!-- 先頭でだけ出す案内 -->
-<p id="hint"><span>下にスクロールすると、小人たちがサイトを組み立てます</span><i aria-hidden="true">↓</i></p>
 
 <!-- 進行の表示とスキップ -->
 <div id="controls">

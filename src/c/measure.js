@@ -29,7 +29,7 @@ export function measure() {
     const r = $(`#site [data-key="${key}"]`).getBoundingClientRect();
     rects[key] = { x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height };
   }
-  const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+  const vw = sr.width, vh = window.innerHeight;   // 幅はスクロールバーの分を除いた、ページの実際の幅
 
   // パーツ(小人が運ぶ単位)。運んでいる途中は transform でずれているので、transform の影響を受けない offset で測る
   const parts = {}, partsOf = {};

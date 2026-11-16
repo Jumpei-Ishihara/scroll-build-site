@@ -10,12 +10,12 @@ body[data-mode="build"] #site [data-key],
 body[data-mode="build"] #site [data-key] * {
   transition: background-color var(--dur-apply) var(--ease-apply), color var(--dur-apply) var(--ease-apply),
     border-color var(--dur-apply) var(--ease-apply), border-radius var(--dur-apply) var(--ease-apply),
-    box-shadow var(--dur-apply) var(--ease-apply), opacity var(--dur-snap) linear, clip-path 0.14s linear;
+    box-shadow var(--dur-apply) var(--ease-apply), opacity var(--dur-snap) linear;
 }
 
-/* パーツは小人と同じ速さで動かす(P-03) */
+/* パーツの位置は毎コマ書き換えるので、transform には補間をかけない(P-03) */
 body[data-mode="build"] #site [data-part] {
-  transition: transform 0.2s linear, background-color var(--dur-apply) var(--ease-apply), color var(--dur-apply) var(--ease-apply),
+  transition: background-color var(--dur-apply) var(--ease-apply), color var(--dur-apply) var(--ease-apply),
     border-color var(--dur-apply) var(--ease-apply), border-radius var(--dur-apply) var(--ease-apply), box-shadow var(--dur-apply) var(--ease-apply);
 }
 

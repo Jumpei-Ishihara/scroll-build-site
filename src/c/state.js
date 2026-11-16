@@ -75,11 +75,16 @@ function workerAt(list, q, cam, last, M) {
   return { x: r1(w.x), y: r1(w.y - cam), visible: true, pose: w.pose, t: w.t, flip: !!w.flip, bare: !!w.bare };
 }
 
+/* 数直線上の位置 p(0〜1)の状態。場面 k の進み具合 q は p = scrollOf(k, q) / maxScroll */
 export function stateAt(p, ctx) {
+  const y = clamp(p) * ctx.M.maxScroll;
+  return compose({ ...locate(y, ctx.M), y }, ctx);
+}
+
+/* loc(どの場面がどこまで進んだか、ページの表示位置)→ 状態 */
+export function compose(loc, ctx) {
   const { M, T } = ctx;
-  p = clamp(p);
-  const y = p * M.maxScroll;
-  const loc = locate(y, M);
+  const y = loc.y, p = M.maxScroll > 0 ? clamp(y / M.maxScroll) : 1;
 
   // elements: 要素がどこまで組み上がったか。parts: パーツが運ばれたか(wait: まだ外 / carry: 運んでいる / placed: 置いた)
   const elements = {}, parts = {};
@@ -114,7 +119,7 @@ export function stateAt(p, ctx) {
     if (q > SUBS[SUBS.length - 1].to) sub = '完成';
   }
   return {
-    p, y, pinned: loc.pinned, scene: loc.scene, q: loc.q, cam: loc.cam, off: loc.off, sub,
+    p, y, pinned: loc.pinned, moving: !!loc.moving, scene: loc.scene, q: loc.q, cam: loc.cam, off: loc.off, sub,
     elements, parts, workers, complete,
   };
 }
@@ -122,10 +127,10 @@ export function stateAt(p, ctx) {
 /* 場面 k の進み具合 q に対応するスクロール位置 */
 export const scrollOf = (k, q, M) => M.scenes[k].s0 + M.scenes[k].hold * clamp(q);
 
-/* 完成サイト上の高さ Y が見える位置へ移動するときのスクロール位置。その場面が組み上がった状態にする(S-24) */
-export function scrollForSiteY(Y, M) {
-  for (const sc of M.scenes) if (sc.top + sc.h > Y + 1) return sc.s1;
-  return M.maxScroll;
+/* 完成サイト上の高さ Y を含む場面の番号(A-14) */
+export function sceneOfY(Y, M) {
+  for (let k = 0; k < M.scenes.length; k++) if (M.scenes[k].top + M.scenes[k].h > Y + 1) return k;
+  return M.scenes.length - 1;
 }
 
 export { ORDER };

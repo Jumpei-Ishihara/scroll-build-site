@@ -118,7 +118,7 @@
   // 工程の終わりで完成サイトと一致
   let maxD = 0;
   for (let k = 0; k < N; k++) {
-    await S.setScene(k, 0.67);
+    await S.setScene(k, 0.77);
     const sr = site.getBoundingClientRect();
     for (const id of M.scenes[k].keys.flatMap(key => M.partsOf[key])) {
       const b = el(id).getBoundingClientRect(), r = M.parts[id];
@@ -169,6 +169,6 @@
     f.remove();
   }
 
-  window.scrollTo(0, 0); await S.settle();
+  await S.setScene(0, 0);
   return done();
 })();

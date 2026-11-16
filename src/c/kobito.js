@@ -19,7 +19,7 @@ const POSES = {
   'wave-0':  st('M20 24l8-12M20 24l-5 7') + st('M20 22v10M20 32l-3 10M20 32l3 10') + HEAD,
   'wave-1':  st('M20 24l11-8M20 24l-5 7') + st('M20 22v10M20 32l-3 10M20 32l3 10') + HEAD,
 };
-const CYCLES = { walk: 10, pull: 8, carry: 14, put: 6, wave: 8 };   // 1 つの手順の間にコマを何回切り替えるか
+const CYCLES = { walk: 4, pull: 4, carry: 5, put: 3, wave: 2 };   // 1 つの手順の間にコマを何回切り替えるか
 
 const svg = (cls, inner) => `<svg class="kobito ${cls}" viewBox="0 0 40 46" aria-hidden="true">${inner}</svg>`;
 

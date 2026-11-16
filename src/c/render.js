@@ -3,13 +3,12 @@ import { $, $$ } from '../core/util.js';
 import { ORDER, WORKERS } from './timeline.js';
 
 export function createRenderer(hooks = {}) {
-  const frame = $('#frame'), pin = $('#pin'), crew = $('#crew'), hint = $('#hint');
+  const frame = $('#frame'), crew = $('#crew');
   const els = Object.fromEntries(ORDER.map(k => [k, $(`#site [data-key="${k}"]`)]));
   const stageName = $('#stage-name'), segs = $$('#controls [data-seg]');
   // パーツ。ID は measure.js と同じ「要素:番号」
   const partEls = {};
   for (const k of ORDER) $$('[data-part]', els[k]).forEach((el, i) => { partEls[`${k}:${i}`] = el; });
-  const lastX = {};
 
   const workerEls = {};
   for (const [id, color] of Object.entries(WORKERS)) {
@@ -24,16 +23,13 @@ export function createRenderer(hooks = {}) {
 
   return function render(st, M, mode) {
     if (mode !== 'build') {                       // 通常のページ。固定も高さの上乗せもなし
-      frame.classList.remove('pinned');
-      set(frame, 'transform', ''); set(pin, 'height', '');
+      set(frame, 'transform', '');
       document.body.toggleAttribute('data-complete', mode === 'done');
       for (const el of Object.values(partEls)) { set(el, 'visibility', ''); set(el, 'transform', ''); }
       return;
     }
-    // 固定中はページを画面に貼り付ける。移動中は通常の流れに戻し、終えた固定の分だけ下にずらす(S-02、S-04、S-05)
-    set(pin, 'height', (M.siteH + M.holds).toFixed(1) + 'px');
-    frame.classList.toggle('pinned', st.pinned);
-    set(frame, 'transform', `translate3d(0, ${(st.pinned ? -st.cam : st.y - st.cam).toFixed(2)}px, 0)`);
+    // ページは画面に貼り付けてあり、表示位置の分だけ上にずらす(A-09)
+    set(frame, 'transform', `translate3d(0, ${(-st.cam).toFixed(2)}px, 0)`);
 
     for (const k of ORDER) {
       const e = st.elements[k], el = els[k];
@@ -49,23 +45,17 @@ export function createRenderer(hooks = {}) {
 
     for (const [id, el] of Object.entries(workerEls)) {
       const w = st.workers[id];
-      if (!w || !w.visible) { set(el, 'visibility', 'hidden'); lastX[id] = null; continue; }
-      const tf = `translate(${w.x}px, ${w.y}px)`;
-      // 外で次のパーツを取って反対側から入るときなど、離れた場所へ移るときは補間しない
-      if (lastX[id] == null || Math.abs(w.x - lastX[id]) > M.vw * 0.5) {
-        el.style.transition = 'none'; set(el, 'transform', tf);
-        void el.offsetWidth;
-        el.style.transition = '';
-      } else set(el, 'transform', tf);
-      lastX[id] = w.x;
+      if (!w || !w.visible) { set(el, 'visibility', 'hidden'); continue; }
+      set(el, 'transform', `translate(${w.x}px, ${w.y}px)`);
       set(el, 'visibility', 'visible');
       if (hooks.renderWorker) hooks.renderWorker(el, id, w);
     }
 
     document.body.toggleAttribute('data-complete', st.complete);
-    set(hint, 'opacity', st.y < 8 ? '1' : '0');                                  // S-20
     const sc = M.scenes[st.scene];
-    text(stageName, st.complete ? '完成しました' : st.pinned ? `${sc.name}・${st.sub}` : 'スクロールして次へ');   // S-21
+    const working = st.pinned && st.q[st.scene] < 1;
+    text(stageName, st.complete ? '完成しました' : working ? `${sc.name}・${st.sub}` : st.moving ? sc.name : 'スクロールで次へ ↓');   // A-11
+    document.body.toggleAttribute('data-waiting', !st.complete && !working && !st.moving);
     segs.forEach((s, i) => s.style.setProperty('--f', st.q[i].toFixed(3)));
   };
 }

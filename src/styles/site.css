@@ -1,6 +1,7 @@
 /* 完成サイトの見た目(SPEC-20 4.1、6 章)。演出のための指定はここに書かない → build.css */
 *, *::before, *::after { box-sizing: border-box; }
-html { overflow-x: clip; -webkit-text-size-adjust: 100%; }
+/* scrollbar-gutter: 演出中はスクロールを止めるが、スクロールバーの分の幅は空けておく。通常のページに切り替えたときに幅が変わらないようにする */
+html { overflow-x: clip; scrollbar-gutter: stable; -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--paper); }
 html.boot body[data-mode="static"] { visibility: hidden; }
 

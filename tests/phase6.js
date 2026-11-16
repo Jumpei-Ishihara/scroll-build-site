@@ -1,5 +1,5 @@
-/* Phase 6 セクション固定方式: 小人、スマホ幅、動きを減らす設定、再読み込み、性能の目安
- * 対象: SPEC-03 K-01〜K-08 / SPEC-00 COM-06, COM-30, COM-40〜42, COM-50, COM-51
+/* Phase 6 小人、スマホ幅、動きを減らす設定、再読み込み、性能の目安
+ * 対象: SPEC-03 K-01〜K-07 / SPEC-05 A-16 / SPEC-00 COM-30, COM-40〜42, COM-50, COM-51
  * 別の幅と設定は、同じページを iframe で開いて確認する。
  * 実行: fetch('tests/phase6.js').then(r=>r.text()).then(eval) → window.__P6RESULTS
  */
@@ -63,15 +63,8 @@
     // パーツを取りに外へ出ている小人もいるので、全員ではなく 1 人以上が画面内にいることを確認する
     const inView = vis.some(w => { const r = w.querySelector('.kobito').getBoundingClientRect(); return r.right > 0 && r.left < innerWidth && r.bottom > 0 && r.top < innerHeight; });
     t('K-02c 作業中の小人が画面内にいる', inView);
-    window.scrollTo(0, S.m.scenes[1].s1 + 30); await S.settle();
+    await S.setProgress((S.m.scenes[1].s1 + 30) / S.m.maxScroll);
     t('K-02d 移動中は小人を出さない', ws.filter(seen).length === 0 && !S.state.pinned);
-
-    // ---- K-08 待機 ----
-    const pr = S.setScene(0, 0.42);
-    const moving = document.body.hasAttribute('data-idle');
-    await pr; await wait(320);
-    const kk = ws.filter(seen)[0];
-    t('K-08 止まると待機の動き', !moving && document.body.hasAttribute('data-idle') && kk && getComputedStyle(kk.querySelector('.kobito')).animationName !== 'none');
 
     // ---- K-07 完成後 ----
     await S.setProgress(1);
@@ -86,10 +79,10 @@
     const perState = (performance.now() - t0) / N2;
     t('COM-50a 状態の計算は 1 回 1 ミリ秒未満', perState < 1, perState.toFixed(3) + 'ms');
     const t1 = performance.now();
-    for (let i = 0; i <= 60; i++) { window.scrollTo(0, i * 90); S.update(); }
+    for (let i = 0; i <= 60; i++) S.setProgress(i / 60);      // 待たずに、状態の計算と DOM への反映だけを測る
     const perFrame = (performance.now() - t1) / 61;
-    t('COM-50b スクロール 1 回あたりの更新は 4 ミリ秒未満', perFrame < 4, perFrame.toFixed(2) + 'ms');
-    window.scrollTo(0, 0); await S.settle();
+    t('COM-50b 1 コマあたりの更新は 4 ミリ秒未満', perFrame < 4, perFrame.toFixed(2) + 'ms');
+    await wait(150); await S.setScene(0, 0);
   }
   const own = performance.getEntriesByType('resource').filter(e => e.name.startsWith(location.origin) && !/\/tests\//.test(e.name));
   const bytes = own.reduce((a, e) => a + (e.decodedBodySize || 0), 0);
@@ -112,7 +105,7 @@
     const f = await open('./?motion=reduce', 1100, 700), w = f.contentWindow, d = w.document, T = w.SB;
     const site = d.querySelector('#site').getBoundingClientRect(), h1 = d.querySelector('#site h1').getBoundingClientRect();
     t('COM-30a 演出なしで static', T && T.mode === 'static' && d.body.dataset.mode === 'static');
-    t('COM-30b 小人・進行表示・案内が出ない', disp(w, '#crew') === 'none' && disp(w, '#controls') === 'none' && disp(w, '#hint') === 'none' && disp(w, '#replay') === 'none');
+    t('COM-30b 小人・進行表示・案内が出ない', disp(w, '#crew') === 'none' && disp(w, '#controls') === 'none' && disp(w, '#replay') === 'none' && !d.documentElement.classList.contains('locked'));
     t('COM-30c 最初から完成サイト', h1.top > 0 && h1.top < 500 && w.getComputedStyle(d.body).visibility === 'visible' &&
       [...d.querySelectorAll('#site [data-key]')].every(el => w.getComputedStyle(el).visibility === 'visible') && Math.abs(d.documentElement.scrollHeight - site.height) <= 2,
       `${d.documentElement.scrollHeight}/${site.height.toFixed(0)}`);
@@ -148,10 +141,12 @@
     w.location.reload();
     await new Promise(r => f.addEventListener('load', r, { once: true }));
     for (let i = 0; i < 60 && !f.contentWindow.SB; i++) await wait(50);
-    await wait(700);
+    await wait(1200);
     T = f.contentWindow.SB;
-    t('COM-06 途中で再読み込みしても同じ位置', T && T.mode === 'build' && T.state.pinned && T.state.scene === 3 && Math.abs(T.state.q[3] - 0.5) < 0.05,
-      T ? `scene=${T.state.scene} q=${T.state.q[3].toFixed(3)}` : 'SB なし');
+    const st2 = T && T.state;
+    t('A-16 再読み込みしても同じ場面で、前の場面は完成形', T && T.mode === 'build' && T.scene === 3 && T.built >= 3 && st2.elements['work-1'].b === 'final' &&
+      st2.elements['contact'].b === 'hidden' && Math.abs(st2.cam - T.m.scenes[3].cam) < 1 && (T.phase === 'build' || T.built === 4),
+      T ? `scene=${T.scene} built=${T.built} phase=${T.phase}` : 'SB なし');
     f.remove();
   }
   return done();
