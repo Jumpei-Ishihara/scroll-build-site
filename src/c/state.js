@@ -11,15 +11,15 @@ import { ORDER, SUBS, B_OF, POSE_OF, CARRY } from './timeline.js';
  */
 export function locate(y, M) {
   const q = M.scenes.map(() => 0);
-  let off = 0;
+  let off = 0, floor = 0;                    // floor: 直前の固定位置。終わりの手前 0.5px でページが上に戻らないようにする
   for (let k = 0; k < M.scenes.length; k++) {
     const sc = M.scenes[k];
-    if (y < sc.s0) return { pinned: false, scene: k, q, cam: y - off, off };
+    if (y < sc.s0) return { pinned: false, scene: k, q, cam: Math.max(floor, y - off), off };
     // 終わりの手前 0.5px は「組み上がった」とみなす。ページの最下部で、小数の誤差のために完成にならないのを防ぐ
     if (y <= sc.s1 - 0.5) { q[k] = inv(sc.s0, sc.s1, y); return { pinned: true, scene: k, q, cam: sc.cam, off }; }
-    q[k] = 1; off += sc.hold;
+    q[k] = 1; off += sc.hold; floor = sc.cam;
   }
-  return { pinned: false, scene: M.scenes.length - 1, q, cam: Math.min(y - off, M.maxCam), off };
+  return { pinned: false, scene: M.scenes.length - 1, q, cam: Math.min(Math.max(floor, y - off), M.maxCam), off };
 }
 
 const r1 = v => Math.round(v * 10) / 10;

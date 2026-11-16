@@ -18,7 +18,7 @@ export const SUBS = [
   { id: 'polish', name: '仕上げ',       action: 'polish', from: 0.84, to: 0.94 },
 ];
 /* 固定の長さ(画面の高さの何倍か)。SPEC-04 3 章 */
-export const HOLD = 1.8;
+export const HOLD = 2.8;
 /* 運ぶ手順のうち、パーツを運んでいる割合。残りは手ぶらで外へ戻る(P-06) */
 export const CARRY = 0.78;
 

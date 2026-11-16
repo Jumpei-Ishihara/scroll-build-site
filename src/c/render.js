@@ -33,7 +33,7 @@ export function createRenderer(hooks = {}) {
     // 固定中はページを画面に貼り付ける。移動中は通常の流れに戻し、終えた固定の分だけ下にずらす(S-02、S-04、S-05)
     set(pin, 'height', (M.siteH + M.holds).toFixed(1) + 'px');
     frame.classList.toggle('pinned', st.pinned);
-    set(frame, 'transform', `translate3d(0, ${(st.pinned ? -st.cam : st.off).toFixed(2)}px, 0)`);
+    set(frame, 'transform', `translate3d(0, ${(st.pinned ? -st.cam : st.y - st.cam).toFixed(2)}px, 0)`);
 
     for (const k of ORDER) {
       const e = st.elements[k], el = els[k];

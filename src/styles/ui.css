@@ -8,7 +8,7 @@ body[data-mode="build"] #frame.pinned { position: fixed; left: 0; right: 0; top:
 
 /* 小人の層。画面に固定。操作を受け取らない */
 body[data-mode="build"] #crew { display: block; position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
-.worker { position: absolute; left: 0; top: 0; visibility: hidden; will-change: transform; transition: transform 0.12s linear; color: var(--c); }
+.worker { position: absolute; left: 0; top: 0; visibility: hidden; will-change: transform; transition: transform 0.2s linear; color: var(--c); }
 
 /* 小人(SPEC-20 4.1)。線画。ヘルメットだけ色を付ける */
 .kobito {

@@ -58,7 +58,7 @@ fetch('tests/run-all.js').then(r => r.text()).then(eval)
 | 変えたいこと | 場所 |
 |---|---|
 | 場面の区切り、場面に含める要素 | `src/c/timeline.js` の `SCENES` |
-| 1 場面あたりの固定の長さ | `src/c/timeline.js` の `HOLD`(画面の高さの 1.8 倍) |
+| 1 場面あたりの固定の長さ | `src/c/timeline.js` の `HOLD`(画面の高さの 2.8 倍) |
 | 工程の配分(骨組み、文字とパーツ、色、仕上げ) | `src/c/timeline.js` の `SUBS` |
 | 小人が 1 回で運ぶ単位 | `index.html` の `data-part` |
 | 色、書体、動きの速さ | `src/styles/tokens.css` |

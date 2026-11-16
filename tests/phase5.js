@@ -51,7 +51,7 @@
   t('S-02 / S-05 固定中は動かず、境界で飛ばない', pinOk, pinD.join(' '));
 
   // ---- S-03 固定の長さ ----
-  t('S-03 固定の長さは画面の 1.8 倍', M.scenes.every(sc => Math.abs(sc.hold - M.vh * 1.8) < 1), M.scenes.map(s => Math.round(s.hold)).join(','));
+  t('S-03 固定の長さは画面の 2.8 倍', M.scenes.every(sc => Math.abs(sc.hold - M.vh * 2.8) < 1), M.scenes.map(s => Math.round(s.hold)).join(','));
 
   // ---- S-04 移動中は 1:1 ----
   const sc1 = M.scenes[1], sc2 = M.scenes[2];
