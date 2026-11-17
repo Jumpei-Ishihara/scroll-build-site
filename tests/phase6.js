@@ -44,7 +44,21 @@
     }
     t('K-02 小人がいるのは固定中だけ', onlyPinned && maxVisible >= 2, '最大 ' + maxVisible + ' 人');
     t('K-03b 歩く・引っ張る・運ぶ・置く・手を振るを使う', POSES.every(p => used.has(p)), [...used].join(','));
-    t('K-04 人数', maxVisible <= (S.m.mobile ? 2 : 3), maxVisible);
+    t('C-01 人数は 8 人', S.crew === 8 && maxVisible <= S.crew, `${S.crew} 人、同時に最大 ${maxVisible} 人`);
+    // C-02: パーツを運ぶ時間。0.8 秒以上
+    const carrySec = S.timeline.map((T, k) => Math.min(...T.steps.filter(s => s.action === 'carry').map(s => (s.b - s.a) * S.buildMs / 1000)));
+    const nParts = S.m.scenes.map(sc => sc.keys.reduce((n, key) => n + S.m.partsOf[key].length, 0));
+    t('C-02 1 つのパーツを運ぶ時間', carrySec.every(v => v >= 0.8) && nParts.every(n => n <= S.crew), carrySec.map(v => v.toFixed(2)).join(' '));
+    // C-03: 同じ小人の手順は重ならない
+    const overlap = S.timeline.some(T => Object.values(T.byWorker).some(l => l.some((s, i) => i > 0 && s.a < l[i - 1].b - 1e-9)));
+    t('C-03 同じ小人の手順が重ならない', !overlap);
+    // C-05: 画面内を歩く速さの目安(1 秒あたり、画面の幅の 3 倍以下)
+    let vmax = 0;
+    for (let k = 0; k < N; k++) { let prev = null; for (let i = 0; i <= 800; i++) {
+      const wsN = S.stateAt(S.pOf(k, i / 800)).workers;
+      if (prev) for (const [id, v] of Object.entries(wsN)) { const p = prev[id]; if (p && p.visible && v.visible && p.pose === v.pose && v.pose !== 'wave' && v.x >= 0 && v.x <= S.m.vw && p.x >= 0 && p.x <= S.m.vw) vmax = Math.max(vmax, Math.hypot(v.x - p.x, v.y - p.y) / (S.buildMs / 1000 / 800)); }
+      prev = wsN; } }
+    t('C-05 小人の速さの上限', vmax <= Math.max(S.m.vw, S.m.vh) * 3, Math.round(vmax) + ' px/秒');
     const enter = S.stateAt(S.pOf(1, 0.001)).workers, mid = S.stateAt(S.pOf(1, 0.4)).workers, leave = S.stateAt(S.pOf(1, 0.995)).workers;
     const off = w => w.x < -20 || w.x > S.m.vw + 20;
     t('K-02b 外から入り、作業して、出ていく', Object.values(enter).filter(w => w.visible).every(off) && Object.values(mid).some(w => w.visible && !off(w)) &&
@@ -112,12 +126,19 @@
     f.remove();
   }
   {
+    // C-04: ?crew=N で人数を変えて見比べられる
+    const f = await open('./?crew=3', 1280, 800), T = f.contentWindow.SB;
+    await T.setScene(0, 0.5);
+    t('C-04 ?crew=3 で 3 人になる', T.crew === 3 && Object.keys(T.state.workers).length === 3, T.crew);
+    f.remove();
+  }
+  {
     const f = await open('./', 375, 700), w = f.contentWindow, d = w.document, T = w.SB;
     const cw = d.documentElement.clientWidth;
     t('COM-41a スマホ幅でも演出が動く', T && T.mode === 'build' && T.m.mobile === true);
     await T.setScene(2, 0.5);
     const n = Object.values(T.state.workers).length;
-    t('K-04 スマホでは 2 人以下', n >= 1 && n <= 2, n);
+    t('C-01 スマホでも 8 人', T.crew === 8 && n >= 1 && n <= 8, `${T.crew} / ${n}`);
     t('COM-40 スマホ幅で横スクロールなし', d.documentElement.scrollWidth <= cw, d.documentElement.scrollWidth + '/' + cw);
     const kb = [...d.querySelectorAll('#crew .worker')].map(x => x.querySelector('.kobito').getBoundingClientRect().height)[0];
     t('K-05 スマホでの小人の大きさ', kb >= 24 && kb <= 32, kb);

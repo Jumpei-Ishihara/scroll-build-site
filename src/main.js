@@ -1,7 +1,7 @@
 /* 起動。演出を行うかどうかを決め、モジュールをつなぐ */
 import { $ } from './core/util.js';
 import { createEngine } from './core/scroll.js';
-import { buildTimeline, BUILD_MS, MOVE_MS } from './c/timeline.js';
+import { buildTimeline, BUILD_MS, MOVE_MS, CREW, crewIds } from './c/timeline.js';
 import { measureFinal, measure } from './c/measure.js';
 import { stateAt, compose, locate, scrollOf, sceneOfY } from './c/state.js';
 import { createRenderer } from './c/render.js';
@@ -14,9 +14,12 @@ const reduced = new URLSearchParams(location.search).get('motion') === 'reduce' 
 function startStatic() {
   // COM-30: 演出を行わず、完成サイトを最初から表示する
   document.body.dataset.mode = 'static';
-  window.SB = { version: '0.4.0', reduced: true, mode: 'static', progress: 1, state: null, m: null,
+  window.SB = { version: '0.5.0', reduced: true, mode: 'static', progress: 1, state: null, m: null,
     stateAt: () => null, onProgress() {}, setProgress: async () => 1, setScene: async () => 1 };
 }
+
+/* 人数を変えて見比べるための指定(?crew=4 など)。指定がなければ CREW の値 */
+const crewParam = parseInt(new URLSearchParams(location.search).get('crew'), 10);
 
 function startBuild() {
   measureFinal();                       // 面を持つ要素に印を付ける。完成形の色を読むので static のうちに呼ぶ
@@ -35,7 +38,8 @@ function startBuild() {
     scrollOf: (k, q) => scrollOf(k, q, ctx.M),
     remeasure() {
       ctx.M = measure();
-      ctx.T = buildTimeline(ctx.M.mobile ? ['a', 'b'] : ['a', 'b', 'c'], ctx.M.partsOf);
+      ctx.crew = crewIds(crewParam > 0 ? crewParam : ctx.M.mobile ? CREW.mobile : CREW.desktop);
+      ctx.T = buildTimeline(ctx.crew, ctx.M.partsOf);
     },
   });
 
@@ -74,8 +78,10 @@ function startBuild() {
     if (r.bottom < 0 || r.top > window.innerHeight) sb.go(sceneOfEl(e.target));
   });
 
-  window.SB = Object.assign(sb, { version: '0.4.0', reduced: false, stateAt: p => stateAt(p, ctx) });
+  window.SB = Object.assign(sb, { version: '0.5.0', reduced: false, stateAt: p => stateAt(p, ctx) });
   Object.defineProperty(window.SB, 'm', { get: () => ctx.M });
+  Object.defineProperty(window.SB, 'crew', { get: () => ctx.crew.length });
+  Object.defineProperty(window.SB, 'timeline', { get: () => ctx.T });
 
   // 書体が読み込まれると文字の位置が変わるので、測り直してから始める(A-01)。読み込みが遅いときは待たない
   let started = false;

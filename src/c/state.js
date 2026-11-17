@@ -2,7 +2,7 @@
  * ctx = { M: 計測値(measure.js), T: 場面ごとの手順(timeline.js) }
  */
 import { clamp, lerp, inv, smooth } from '../core/util.js';
-import { ORDER, SUBS, B_OF, POSE_OF, CARRY } from './timeline.js';
+import { ORDER, SUBS, B_OF, POSE_OF, WALK } from './timeline.js';
 
 /* スクロール位置 y が、どの場面の固定中か、または移動中かを求める。
  *   pinned: 固定中か / scene: 固定中の場面、移動中は次に来る場面
@@ -33,44 +33,43 @@ function carryOffset(part, t) {
 /* 手順 s の途中(u: 0〜1)の小人。位置は完成サイト上の座標 */
 function at(s, u, M) {
   if (s.action === 'carry') {
-    // 運ぶ手順: パーツの真下で両手で持ち上げて運び(P-03)、置いたら手ぶらで外へ戻る(P-06)
+    // 運ぶ手順: パーツの真下で両手で持ち上げて運ぶ(P-03)。置いたあとは、次の手順へ歩く(P-06)
     const p = M.parts[s.part];
     const foot = p.y + p.h + (M.mobile ? 25 : 36);          // 手がパーツの下の辺に届く、足元の高さ
-    const cx = p.x + p.w / 2;
-    if (u <= CARRY) {
-      const t = u / CARRY, o = carryOffset(p, t);
-      return { x: cx + o.dx, y: foot + o.dy, pose: 'carry', t, flip: p.dx0 > 0, bare: true };
-    }
-    const t = inv(CARRY, 1, u), out = p.dx0 < 0 ? -46 : M.vw + 46;
-    return { x: lerp(cx, out, smooth(t)), y: foot, pose: 'walk', t, flip: out < cx };
+    const o = carryOffset(p, u);
+    return { x: p.x + p.w / 2 + o.dx, y: foot + o.dy, pose: 'carry', t: u, flip: p.dx0 > 0, bare: true };
   }
   const r = M.rects[s.target];
+  // 色と仕上げは、要素の中央あたりで小さく動く(広い要素でも速くならないよう、動く幅に上限を置く)
+  const span = (len, rate, max) => Math.min(len * rate, max) * (u - 0.5);
   const pos = s.action === 'box' ? { x: r.x + r.w * u, y: r.y + r.h * u }
-    : s.action === 'fill' ? { x: r.x + r.w * (0.3 + 0.4 * u), y: r.y + r.h * (0.4 + 0.2 * u) }
-    : { x: r.x + r.w * (0.25 + 0.5 * u), y: r.y + r.h * 0.5 };
+    : s.action === 'fill' ? { x: r.x + r.w * 0.5 + span(r.w, 0.4, 90), y: r.y + r.h * 0.5 + span(r.h, 0.2, 24) }
+    : { x: r.x + r.w * 0.5 - span(r.w, 0.5, 110), y: r.y + r.h * 0.5 };   // 色を塗り終えた側から戻りながら仕上げる
   return { ...pos, pose: POSE_OF[s.action], t: u, flip: false, bare: s.action === 'polish' };
 }
 
 /* 場面 k の小人 1 人の状態。位置は画面上の座標 */
 function workerAt(list, q, cam, last, M) {
   const first = list[0], end = list[list.length - 1];
-  const side = M.vw + 46;                                   // 画面の右の外
+  const side = x => x < M.vw / 2 ? -46 : M.vw + 46;         // 近いほうの画面の外。出入りの距離を短くして、歩く速さを抑える
   const walk = (A, B, t) => ({ x: lerp(A.x, B.x, smooth(t)), y: lerp(A.y, B.y, smooth(t)), pose: 'walk', t, flip: B.x < A.x });
   let w;
   if (q <= first.a) {                                       // 入ってくる
     const to = at(first, 0, M);
-    w = walk({ x: side, y: to.y }, to, inv(0, first.a, q));
-  } else if (q >= end.b) {                                  // 出ていく。最後の場面では残って手を振る(K-06)
+    w = walk({ x: side(to.x), y: to.y }, to, inv(Math.max(0, first.a - WALK), first.a, q));
+  } else if (q >= end.b) {                                  // 出ていく。最後の場面で仕上げをした小人は、残って手を振る(K-06)
     const from = at(end, 1, M);
-    const t = inv(end.b, 1, q);
-    w = last ? { ...from, pose: 'wave', t, flip: false, bare: false } : walk(from, { x: side, y: from.y }, t);
+    w = last && end.action === 'polish' ? { ...from, pose: 'wave', t: inv(end.b, 1, q), flip: false, bare: false }
+      : walk(from, { x: side(from.x), y: from.y }, inv(end.b, Math.min(1, end.b + WALK), q));
   } else {
     let i = 0;
     for (let j = 0; j < list.length; j++) if (q > list[j].a) i = j;
     const s = list[i], next = list[i + 1];
     if (q <= s.b) w = at(s, inv(s.a, s.b, q), M);
-    else if (s.action === 'carry' && next.action === 'carry') return { x: 0, y: 0, visible: false, pose: 'walk', t: 0, flip: false, bare: false };   // 外で次のパーツを取っている
-    else w = walk(at(s, 1, M), at(next, 0, M), inv(s.b, next.a, q));
+    else if (next.action === 'carry') {                     // 次のパーツを取りに、近いほうの外へ出る
+      const from = at(s, 1, M);
+      w = walk(from, { x: side(from.x), y: from.y }, inv(s.b, Math.min(next.a, s.b + WALK), q));
+    } else w = walk(at(s, 1, M), at(next, 0, M), inv(s.b, next.a, q));
   }
   return { x: r1(w.x), y: r1(w.y - cam), visible: true, pose: w.pose, t: w.t, flip: !!w.flip, bare: !!w.bare };
 }
@@ -100,7 +99,7 @@ export function compose(loc, ctx) {
       const t = inv(s.a, s.b, q), e = elements[s.target];
       e.b = B_OF[s.action]; e.t = t;
       if (s.action !== 'carry') continue;
-      const c = clamp(t / CARRY);
+      const c = clamp(t);
       parts[s.part] = c >= 1 ? { s: 'placed', dx: 0, dy: 0 } : { s: 'carry', ...carryOffset(M.parts[s.part], c) };
     }
   });

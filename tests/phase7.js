@@ -29,7 +29,7 @@
   // 場面ごとに細かく進めて、状態を集める
   const carried = new Set(), fromOutside = new Set(), order = {};
   let under = true, underD = '', maxCarry = 0, mono = true, slot = true, walkOut = 0, walkOutOk = true, waitDx = true;
-  const nWorkers = M.mobile ? 2 : 3;
+  const nWorkers = S.crew;
   const foot = M.mobile ? 25 : 36;
   for (let k = 0; k < N; k++) {
     const prev = {};
@@ -64,7 +64,7 @@
         if (pw && pw.visible && pw.pose === 'carry' && w.visible && w.pose === 'walk') {
           walkOut++;
           const later = S.stateAt(S.pOf(k, Math.min(1, (i + 3) / 500))).workers[wid];
-          if (later && later.visible && later.pose === 'walk' && Math.abs(later.x - M.vw / 2) < Math.abs(w.x - M.vw / 2) - 0.01) walkOutOk = false;
+          if (!later || !later.visible || later.pose === 'carry' || w.bare) walkOutOk = false;   // 手ぶらで歩いて、次の作業へ向かう
         }
       }
       prevWorkers = st.workers;
@@ -76,7 +76,7 @@
   t('P-03 運んでいるパーツの真下に小人がいる', under, underD);
   t('P-07 同時に運ぶ数は人数以下', maxCarry >= 2 && maxCarry <= nWorkers, `${maxCarry}/${nWorkers}`);
   t('P-04a 置いたパーツは戻らない', mono);
-  t('P-06 置いたあとは歩いて外へ', walkOut >= ids.length * 0.8 && walkOutOk, `${walkOut} 回`);
+  t('P-06 置いたあとは手ぶらで歩いて離れる', walkOut >= ids.length * 0.8 && walkOutOk, `${walkOut} 回`);
   t('P-08a 運んでいる間は枠の状態', slot);
   const title = order['hero-title'] || [];
   t('P-09 見出しは 3 つのかたまりで順に運ぶ', title.length === 3 && title.join() === M.partsOf['hero-title'].join(), title.join(' '));
@@ -164,7 +164,7 @@
       const c = mids.filter(id => st.parts[id].s === 'carry'); mc = Math.max(mc, c.length); c.forEach(id => all.add(id));
     }
     await T.setScene(1, 0.4);
-    t('P-07 スマホでは同時に 2 つまで、全パーツを運ぶ', mc <= 2 && all.size === mids.length, `${mc} / ${all.size}/${mids.length}`);
+    t('P-07 スマホでも同時に運ぶ数は人数以下、全パーツを運ぶ', mc <= T.crew && all.size === mids.length, `${mc} / ${all.size}/${mids.length}`);
     t('P-12 スマホ幅で運んでいる最中も横スクロールなし', d.documentElement.scrollWidth <= d.documentElement.clientWidth, d.documentElement.scrollWidth + '/' + d.documentElement.clientWidth);
     f.remove();
   }

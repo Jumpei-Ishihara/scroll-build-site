@@ -50,9 +50,11 @@ fetch('tests/run-all.js').then(r => r.text()).then(eval)
 | ファイル | 対象 | 件数 |
 |---|---|---|
 | `phase5.js` | 場面の表示位置、組み立ての順序、操作できる範囲 | 16 |
-| `phase6.js` | 小人、スマホ幅、動きを減らす設定、幅の変更、再読み込み、性能の目安 | 27 |
+| `phase6.js` | 小人(人数と速さを含む)、スマホ幅、動きを減らす設定、幅の変更、再読み込み、性能の目安 | 31 |
 | `phase7.js` | 小人がパーツを運ぶ演出 | 22 |
 | `phase8.js` | 時間で進む組み立て、スクロール・キー・スワイプでの移動、スキップ、やり直し、ページ内リンク | 28 |
+
+人数ごとの小人の速さは `tests/crew-speed.js` で測れる(SPEC-06)。同じように読み込むと、結果が `window.__CREW` に入る。
 
 ## 調整する場所
 
@@ -60,6 +62,7 @@ fetch('tests/run-all.js').then(r => r.text()).then(eval)
 |---|---|
 | 場面の区切り、場面に含める要素 | `src/c/timeline.js` の `SCENES` |
 | 1 場面の組み立てにかける時間 | `src/c/timeline.js` の `BUILD_MS`(3200 ミリ秒) |
+| 小人の人数 | `src/c/timeline.js` の `CREW`(デスクトップもスマホも 8 人)。URL に `?crew=4` のように付けると、その人数で試せる |
 | 場面の間の移動にかける時間 | `src/c/timeline.js` の `MOVE_MS`(700 ミリ秒) |
 | 工程の配分(骨組み、文字とパーツ、色、仕上げ) | `src/c/timeline.js` の `SUBS` |
 | 小人が 1 回で運ぶ単位 | `index.html` の `data-part` |
@@ -76,4 +79,5 @@ fetch('tests/run-all.js').then(r => r.text()).then(eval)
 | `SB.next()` / `SB.prev()` / `SB.go(k)` | 次、前、場面 `k` へ移動する |
 | `SB.setScene(k, q)` | テスト用。アニメーションを止め、場面 `k` の進み具合 `q` の状態にする |
 | `SB.setProgress(p)` | テスト用。アニメーションを止め、進行度 `p` の状態にする |
+| `SB.crew` / `SB.timeline` | 小人の人数、場面ごとの手順 |
 | `SB.m` | 計測値。`SB.m.scenes` に場面ごとの固定位置が入る |
